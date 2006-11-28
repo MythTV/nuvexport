@@ -188,7 +188,7 @@ package export::generic;
     # Nothing?
         die "Can't find mythcommflag.\n" unless ($mythcommflag);
     # Generate the cutlist
-        system("$NICE $mythcommflag --gencutlist -c $episode->{'channel'} -s $episode->{'start_time_sep'}");
+        system("$NICE $mythcommflag --gencutlist -c '$episode->{'chanid'}' -s '".unix_to_myth_time($episode->{'recstartts'})."'");
     }
 
 # Check for a duplicate filename, and return a full path to the output filename
@@ -206,12 +206,11 @@ package export::generic;
             if ($outfile = $self->val('filename')) {
             # Generate a list
                 my %field;
-                ($field{'f'} = ($episode->{'filename'}    or '')) =~ s/%/%%/g;
-                ($field{'c'} = ($episode->{'channel'}     or '')) =~ s/%/%%/g;
-                ($field{'a'} = ($episode->{'start_time'}  or '')) =~ s/%/%%/g;
-                ($field{'b'} = ($episode->{'end_time'}    or '')) =~ s/%/%%/g;
-                ($field{'t'} = ($episode->{'show_name'}   or '')) =~ s/%/%%/g;  # title
-                ($field{'s'} = ($episode->{'title'}       or '')) =~ s/%/%%/g;  # subtitle/episode
+                ($field{'c'} = ($episode->{'chanid'}      or '')) =~ s/%/%%/g;
+                ($field{'a'} = ($episode->{'showtime'}    or '')) =~ s/%/%%/g;
+                ($field{'b'} = ($episode->{'endtime'}     or '')) =~ s/%/%%/g;
+                ($field{'t'} = ($episode->{'title'}       or '')) =~ s/%/%%/g;  # title
+                ($field{'s'} = ($episode->{'subtitle'}    or '')) =~ s/%/%%/g;  # subtitle/episode
                 ($field{'h'} = ($episode->{'host'}        or '')) =~ s/%/%%/g;
                 ($field{'m'} = ($episode->{'showtime'}    or '')) =~ s/%/%%/g;
                 ($field{'d'} = ($episode->{'description'} or '')) =~ s/%/%%/g;
@@ -222,14 +221,14 @@ package export::generic;
             }
         # Default format
             else {
-                if ($episode->{'show_name'} ne 'Untitled' and $episode->{'title'} ne 'Untitled') {
-                    $outfile = $episode->{'show_name'}.' - '.$episode->{'title'};
+                if ($episode->{'title'} ne 'Untitled' and $episode->{'subtitle'} ne 'Untitled') {
+                    $outfile = $episode->{'title'}.' - '.$episode->{'subtitle'};
                 }
-                elsif($episode->{'show_name'} ne 'Untitled') {
-                    $outfile = $episode->{'show_name'};
+                elsif($episode->{'title'} ne 'Untitled') {
+                    $outfile = $episode->{'title'};
                 }
                 elsif($episode ne 'Untitled') {
-                    $outfile = $episode->{'title'};
+                    $outfile = $episode->{'subtitle'};
                 }
                 else {
                     $outfile = 'Untitled';
@@ -307,6 +306,29 @@ package export::generic;
             print "Height must be a multiple of 16.\n";
             $self->{'height'} = int(($h + 8) / 16) * 16;
         }
+    }
+
+# Save program details
+    sub save_txt_details {
+        my $self       = shift;
+        my $episode    = shift;
+        my $outfile    = $self->get_outfile($episode, '.txt');
+    # Some clean versions of the various fields
+        my $clean_desc = $episode->{'description'};
+            $clean_desc =~ tr/\n/ /;
+        my $clean_subtitle = $episode->{'subtitle'};
+            $clean_subtitle = '' if ($clean_subtitle eq 'Untitled');
+    # Save the file
+        print "Saving details to:  $outfile\n";
+        open(DATA, ">$outfile") or die "Can't create $outfile:  $!\n";
+        print DATA <<EOF;
+      title: $episode->{'title'}
+   subtitle: $clean_subtitle
+description: $clean_desc
+    channel: $episode->{'callsign'}, $episode->{'channame'}
+    airdate: $episode->{'showtime'}
+EOF
+        close DATA;
     }
 
 # This subroutine forks and executes one system command - nothing fancy

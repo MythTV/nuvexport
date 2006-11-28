@@ -226,7 +226,11 @@ package export::transcode;
             }
         # Here, we have to fork off a copy of mythtranscode (no need to use --fifosync with transcode -- it seems to do this on its own)
             my $mythtranscode_bin = find_program('mythtranscode');
-            $mythtranscode = "$NICE $mythtranscode_bin --showprogress -p $episode->{'transcoder'} -c $episode->{'channel'} -s $episode->{'start_time_sep'} -f \"/tmp/fifodir_$$/\"";
+            $mythtranscode = "$NICE $mythtranscode_bin --showprogress"
+                            ." -p '$episode->{'transcoder'}'"
+                            ." -c '$episode->{'chanid'}'"
+                            ." -s '".unix_to_myth_time($episode->{'recstartts'})."'"
+                            ." -f \"/tmp/fifodir_$$/\"";
         # On no-audio encodes, we need to do something to keep mythtranscode's audio buffers from filling up available RAM
         #    $mythtranscode .= ' --fifosync' if ($skip_audio);
         # Let mythtranscode handle the cutlist?
@@ -245,7 +249,7 @@ package export::transcode;
         }
     # Is an mpeg
         else {
-            $transcode .= " -i $episode->{'filename'} -x ";
+            $transcode .= ' -i '.shell_safe($episode->{'local_path'}).' -x ';
             if ($episode->{'finfo'}{'mpeg_stream_type'} eq 'mpegpes') {
                 $transcode .= 'vob';
             }

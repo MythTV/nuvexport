@@ -90,7 +90,7 @@
 #  prior to making any aspect conversions like removing black bars from 4:3
 #  recordings to make a 16:9 export.
 #
-    crop_pct = 2
+    crop_pct = 1.5
 
 #
 #  Alternatively, you can override the general crop_pct to crop a different
@@ -113,7 +113,7 @@
 #
 # Default to export to the current directory
 #
-    path = .
+    path = /home/xris/Video
 
 #
 # Use the cutlist (not to be confused with the commercial flag list) when
@@ -141,7 +141,7 @@
 #    expense of some quality.  You can also access this on the commandline via
 #    the --denoise (or --nodenoise) flag.
 #
-    noise_reduction = yes
+    noise_reduction = no
 
 #
 # Deinterlace the video so that it looks better on software players.
@@ -231,15 +231,15 @@
     quantisation = 6     # 4 through 6 is probably right...  1..31 are allowed (lower is better quality)
 
     a_bitrate    = 128   # Audio bitrate of 128 kbps
-    v_bitrate    = 960   # Remember, quantisation overrides video bitrate
+    v_bitrate    = 768   # Remember, quantisation overrides video bitrate
 
-    width        = 624   # Height adjusts automatically to width, according to aspect ratio
+    width        = 512   # Height adjusts automatically to width, according to aspect ratio
     height       = auto
 
 </XviD>
 
 #
-#  Default mp3 bitrate in MythTV is 128
+#  Default mp3 bitrate is 128
 #
 <MP3>
     bitrate = 128
@@ -250,25 +250,6 @@
 #    use its full name, and it will override any more generic settings.
 #
 
-#
-# The MP4 encoder for ffmpeg has a couple of options unique to itself
-#
-<ffmpeg::MP4>
-
-# Codec to use (mpeg4 or h264).  Please note that h264 support requires the
-# SVN version of ffmpeg (not CVS!).  In fact, even the mpeg4 codec works
-# better with the SVN version.
-    mp4_codec = mpeg4
-
-# Framerate to use:  auto, 25, 23.97, 29.97.  PAL will always be 25 fps, and
-# auto will set 29.97 for everything over 320x288 and 23.97 for the rest.
-    mp4_fps = auto
-
-</ffmpeg::MP4>
-
-#
-# As does the PSP exporter
-#
 <ffmpeg::PSP>
 
 # PSP framerate (high=29.97, low=14.985)
@@ -285,14 +266,28 @@
 
 </ffmpeg::PSP>
 
-#
-# You can also add flags to the one and only mencoder option
-#
-<mencoder::XviD>
+<ffmpeg::MP4>
 
-    multipass = no
+# Codec to use (xvid or h264).  Please note that h264 support is experimental.
+# I have not yet been able to export a file using h264 that actuall works,
+# despite the fact that I've tried my best to copy the ffmpeg parameters from
+# iSquint, which does work.
+    mp4_codec = h264
 
-</mencoder::XviD>
+    noise_reduction = no
+    deinterlace     = yes
+    multipass       = yes
+    v_bitrate       = 768
+    a_bitrate       = 128
+
+    width        = 528
+    height       = 480
+
+# Framerate to use:  auto, 25, 23.97, 29.97.  PAL will always be 25 fps, and
+# auto will set 29.97 for everything over 320x288 and 23.97 for the rest.
+    mp4_fps = auto
+
+</ffmpeg::MP4>
 
 #
 # You can also make specific profiles called with the --profile parameter that
@@ -301,13 +296,83 @@
 # For example, you could make a profile that would encode your favorite show
 # with your favorite settings.
 #
-<profile::sample>
+<profile::bourdain>
 
-    title       = test
+    title       = bourdain
 
-    export_prog = transcode
-    mode        = xvid
-    confirm     = true
+    export_prog = ffmpeg
+    mode        = mp4
 
-</profile::sample>
+    crop_pct    = 0
+    crop_right  = 1.5
+    crop_left   = 1.5
 
+    width        = 528
+    height       = 480
+
+</profile::bourdain>
+
+<profile::follow>
+
+    title       = follow that
+
+    export_prog = ffmpeg
+    mode        = mp4
+
+    crop_pct = 0
+
+    width  = 352
+    height = 480
+
+    # The episodes all say "follow that" at the beginning
+    filename=%s
+
+</profile::follow>
+
+<profile::goodeats>
+
+    title       = good eats
+
+    export_prog = ffmpeg
+    mode        = mp4
+
+    crop_pct    = 0
+    crop_top    = 1
+    crop_right  = 1
+    crop_left   = 1
+
+    width        = 528
+    height       = 480
+
+</profile::goodeats>
+
+<profile::iron>
+
+    title       = iron chef
+
+    export_prog = ffmpeg
+    mode        = mp4
+
+    crop_pct    = 0
+    crop_top    = 1
+    crop_left   = 1
+
+    width        = 528
+    height       = 480
+
+</profile::iron>
+
+<profile::greg>
+
+    title       = greg the
+
+    export_prog = ffmpeg
+    mode        = mp4
+
+    crop_pct    = 0
+    crop_left   = 1
+
+    width        = 528
+    height       = 480
+
+</profile::greg>

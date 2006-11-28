@@ -16,8 +16,8 @@ package nuv_export::ui;
 # Load the myth and nuv utilities, and make sure we're connected to the database
     use nuv_export::shared_utils;
     use nuv_export::cli;
-    use mythtv::db;
     use mythtv::recordings;
+    use Date::Manip;
 
     BEGIN {
         use Exporter;
@@ -41,7 +41,7 @@ package nuv_export::ui;
                 foreach my $episode (@{$Shows{$show}}) {
                     my $subtitle    = arg('subtitle');
                     my $description = arg('description');
-                    next unless (!$subtitle    || $episode->{'title'}       =~ /$subtitle/si);
+                    next unless (!$subtitle    || $episode->{'subtitle'}    =~ /$subtitle/si);
                     next unless (!$description || $episode->{'description'} =~ /$description/si);
                 # Make sure we have finfo
                     load_finfo($episode);
@@ -55,11 +55,11 @@ package nuv_export::ui;
     # Look for a filename or channel/starttime
         else {
             my $chanid    = arg('chanid');
-            my $starttime = arg('starttime');
+            my $starttime = UnixDate(arg('starttime'), '%s');
         # Filename specified on the command line -- extract the chanid and starttime
             if (arg('infile')) {
             # Try to pick out the chanid and starttime from the database
-                my $sh = $dbh->prepare('SELECT chanid, starttime FROM recorded WHERE basename=?');
+                my $sh = $dbh->prepare('SELECT chanid, UNIX_TIMESTAMP(starttime) FROM recorded WHERE basename=?');
                 if ($sh) {
                 # Stip off the video directory so the basename will actually match
                     my $infile = arg('infile');
@@ -68,10 +68,6 @@ package nuv_export::ui;
                     $rows = $sh->execute($infile);
                     if (defined $rows) {
                         ($chanid, $starttime) = $sh->fetchrow_array();
-                        if ($starttime) {
-                        # strip non-numbers to get the proper format
-                            $starttime =~ tr/0-9//cd;
-                        }
                     }
                     $sh->finish;
                 }
@@ -89,7 +85,7 @@ package nuv_export::ui;
             # Make sure the requested show exists
                 foreach my $show (sort keys %Shows) {
                     foreach my $episode (@{$Shows{$show}}) {
-                        next unless ($chanid == $episode->{'channel'} && $starttime == $episode->{'start_time'});
+                        next unless ($chanid == $episode->{'channel'} && $starttime == $episode->{'starttime'});
                         load_finfo($episode);
                         push @matches, $episode;
                         last;
@@ -105,12 +101,13 @@ package nuv_export::ui;
             if (@matches) {
                 print "\nMatching Shows:\n\n";
                 foreach my $episode (@matches) {
-                    print "     title:  $episode->{'show_name'}\n",
-                          "  subtitle:  $episode->{'title'}\n",
-                          "    chanid:  $episode->{'channel'}\n",
-                          "    starts:  $episode->{'start_time'}\n",
-                          "      ends:  $episode->{'end_time'}\n",
-                          "  filename:  $video_dir/$episode->{'filename'}\n\n";
+                    print "     title:  $episode->{'title'}\n",
+                          "  subtitle:  $episode->{'subtitle'}\n",
+                          "   channel:  $episode->{'callsign'}, $episode->{'channame'}\n",
+                          "    starts:  ", unix_to_myth_time($episode->{'starttime'}),           "\n",
+                          "      ends:  ", unix_to_myth_time($episode->{'endtime'}),             "\n",
+                          "  filename:  ", ($episode->{'local_path'} or $episode->{'filename'}), "\n",
+                          "\n";
                 }
             }
             else {
@@ -177,7 +174,7 @@ package nuv_export::ui;
         # Figure out if there are any episodes of this program that haven't already been selected
             my $num_episodes = @{$Shows{$show}};
             foreach my $selected (@episodes) {
-                next unless ($show eq $selected->{'show_name'});
+                next unless ($show eq $selected->{'title'});
                 $num_episodes--;
                 last if ($num_episodes < 1);
             }
@@ -233,7 +230,7 @@ package nuv_export::ui;
             my $aspect = "";
             foreach my $selected (@episodes) {
                 next unless ($selected->{'channel'} == $episode->{'channel'}
-                             && $selected->{'start_time'} eq $episode->{'start_time'});
+                             && $selected->{'starttime'} == $episode->{'starttime'});
                 $found = 1;
                 last;
             }
@@ -248,7 +245,7 @@ package nuv_export::ui;
             $query .= ' ' if ($num_episodes > 100 && $count < 100);
             $query .= "$count. ";
         # Print out the show name
-            $query .= "$episode->{'title'} " if ($episode->{'title'} && $episode->{'title'} ne 'Untitled');
+            $query .= "$episode->{'subtitle'} " if ($episode->{'subtitle'} && $episode->{'subtitle'} ne 'Untitled');
             $query .= "($episode->{'showtime'}) ".$episode->{'finfo'}{'width'}.'x'.$episode->{'finfo'}->{'height'}
                      .' '.$episode->{'finfo'}{'video_type'}.' ('.$episode->{'finfo'}{'aspect'}.')';
             $query .= wrap($episode->{'description'}, 80, $newline, '', $newline) if ($episode->{'description'});
@@ -315,8 +312,8 @@ package nuv_export::ui;
             $query .= ' ' if ($num_episodes > 100 && $count < 100);
             $query .= "$count. ";
         # Print out the show name
-            $query .= "$episode->{'show_name'}:$newline";
-            $query .= "$episode->{'title'} " if ($episode->{'title'} && $episode->{'title'} ne 'Untitled');
+            $query .= "$episode->{'title'}:$newline";
+            $query .= "$episode->{'subtitle'} " if ($episode->{'subtitle'} && $episode->{'subtitle'} ne 'Untitled');
             $query .= "($episode->{'showtime'}) ".$episode->{'finfo'}{'width'}.'x'.$episode->{'finfo'}->{'height'}
                      .' '.$episode->{'finfo'}{'video_type'}.' ('.$episode->{'finfo'}{'aspect'}.')';
             $query .= wrap($episode->{'description'}, 80, $newline, '', $newline) if ($episode->{'description'});

@@ -135,9 +135,9 @@ package export::ffmpeg::XviD;
     # Make sure we have the framerate
         $self->{'out_fps'} = $episode->{'finfo'}{'fps'};
     # Embed the title
-        $safe_title = $episode->{'show_name'};
-        if ($episode->{'title'} ne 'Untitled') {
-            $safe_title .= ' - '.$episode->{'title'};
+        $safe_title = $episode->{'title'};
+        if ($episode->{'subtitle'} ne 'Untitled') {
+            $safe_title .= ' - '.$episode->{'subtitle'};
         }
         my $safe_title = shell_escape($safe_title);
     # Build the common ffmpeg string

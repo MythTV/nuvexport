@@ -52,26 +52,29 @@ package export::NUV_SQL;
 # Gather settings from the user
     sub gather_settings {
         my $self = shift;
-    # Let the user know what's going on
-        print "\nYou have chosen to extract the .nuv.\n"
-             ."This will extract it from the MythTV database into .nuv and .sql \n"
-             ."files to import into another MythTV installation.\n\n";
-    # Make sure the user knows what he/she is doing
-        $self->{'delete'} = query_text("Do you want to remove it from this server when finished?",
-                                       'yesno',
-                                       $self->{'delete'} ? 'Yes' : 'No');
-    # Make EXTRA sure
-        if ($self->{'delete'}) {
-            $self->{'delete'} = query_text("\nAre you ".colored('sure', 'bold').' you want to remove it from this server?',
+    # Only ask for data if we're actually extracting a file
+        if (!arg('only_save_info')) {
+        # Let the user know what's going on
+            print "\nYou have chosen to extract the .nuv.\n"
+                 ."This will extract it from the MythTV database into .nuv and .sql \n"
+                 ."files to import into another MythTV installation.\n\n";
+        # Make sure the user knows what he/she is doing
+            $self->{'delete'} = query_text("Do you want to remove it from this server when finished?",
                                            'yesno',
-                                           'No');
+                                           $self->{'delete'} ? 'Yes' : 'No');
+        # Make EXTRA sure
+            if ($self->{'delete'}) {
+                $self->{'delete'} = query_text("\nAre you ".colored('sure', 'bold').' you want to remove it from this server?',
+                                               'yesno',
+                                               'No');
+            }
+        # Create a directory with the show name
+            $self->{'create_dir'} = query_text('Store exported files in a directory with the show name?',
+                                               'yesno',
+                                               $self->{'create_dir'} ? 'Yes' : 'No');
         }
     # Load the save path, if requested
         $self->{'path'} = query_savepath($self->val('path'));
-    # Create a
-        $self->{'create_dir'} = query_text('Create a directory with the show name?',
-                                           'yesno',
-                                           $self->{'create_dir'} ? 'Yes' : 'No');
     }
 
     sub export {
@@ -86,17 +89,17 @@ package export::NUV_SQL;
             $self->{'export_path'} = $self->{'path'};
         }
     # Load the three files we'll be using
-        my $txt_file = basename($episode->{'filename'}, '.nuv') . '.txt';
-        my $sql_file = basename($episode->{'filename'}, '.nuv') . '.sql';
-        my $nuv_file = basename($episode->{'filename'});
+        my $txt_file = basename($episode->{'local_path'}, '.nuv') . '.txt';
+        my $sql_file = basename($episode->{'local_path'}, '.nuv') . '.sql';
+        my $nuv_file = basename($episode->{'local_path'});
     # Create a txt file with descriptive info in it
         open(DATA, ">$self->{'export_path'}/$txt_file") or die "Can't create $self->{'export_path'}/$txt_file:  $!\n\n";
-        print DATA '       Show:  ', $episode->{'show_name'},                                        "\n",
-                   '    Episode:  ', $episode->{'title'},                                            "\n",
+        print DATA '       Show:  ', $episode->{'title'},                                            "\n",
+                   '    Episode:  ', $episode->{'subtitle'},                                         "\n",
                    '   Recorded:  ', $episode->{'showtime'},                                         "\n",
                    'Description:  ', wrap($episode->{'description'}, 64,'', '', "\n              "), "\n",
                    "\n",
-                   ' Orig. File:  ', $episode->{'filename'},                                         "\n",
+                   ' Orig. File:  ', $episode->{'local_path'},                                       "\n",
                    '       Type:  ', $episode->{'finfo'}{'video_type'},                              "\n",
                    ' Dimensions:  ', $episode->{'finfo'}{'width'}.'x'.$episode->{'finfo'}{'height'}, "\n",
                    ;
@@ -108,9 +111,9 @@ package export::NUV_SQL;
     # Load and save the related database info
         print DATA "USE mythconverg;\n\n";
         foreach $table ('recorded', 'oldrecorded', 'recordedmarkup', 'recordedseek') {
-            $q = "SELECT * FROM $table WHERE chanid=? AND starttime=?";
+            $q = "SELECT * FROM $table WHERE chanid=? AND starttime=FROM_UNIXTIME(?)";
             $sh = $dbh->prepare($q);
-            $sh->execute($episode->{'channel'}, $episode->{'start_time'})
+            $sh->execute($episode->{'chanid'}, $episode->{'starttime'})
                 or die "Count not execute ($q):  $!\n\n";
             my $count = 0;
             my @keys = undef;
@@ -137,18 +140,22 @@ package export::NUV_SQL;
         close DATA;
     # Rename/move the file
         if ($self->{'delete'}) {
-            print "\nMoving $episode->{'filename'} to $self->{'export_path'}/$nuv_file\n";
-            move($episode->{'filename'}, "$self->{'export_path'}/$nuv_file")
+            print "\nMoving $episode->{'local_path'} to $self->{'export_path'}/$nuv_file\n";
+            move($episode->{'local_path'}, "$self->{'export_path'}/$nuv_file")
                 or die "Couldn't move specified .nuv file:  $!\n\n";
+        #
+        # @todo: Call the backend to delete the recording, rather than doing it
+        # manually, since this table list is no longer ANYWHERE near complete.
+        #
         # Remove the entry from recordedmarkup
-            $q = 'DELETE FROM recordedmarkup WHERE chanid=? AND starttime=?';
+            $q = 'DELETE FROM recordedmarkup WHERE chanid=? AND starttime=FROM_UNIXTIME(?)';
             $sh = $dbh->prepare($q);
-            $sh->execute($episode->{'channel'}, $episode->{'start_time'})
+            $sh->execute($episode->{'chanid'}, $episode->{'starttime'})
                 or die "Could not execute ($q):  $!\n\n";
         # Remove this entry from the database
-            $q = 'DELETE FROM recorded WHERE chanid=? AND starttime=? AND endtime=?';
+            $q = 'DELETE FROM recorded WHERE chanid=? AND starttime=FROM_UNIXTIME(?)';
             $sh = $dbh->prepare($q);
-            $sh->execute($episode->{'channel'}, $episode->{'start_time'}, $episode->{'end_time'})
+            $sh->execute($episode->{'chanid'}, $episode->{'starttime'})
                 or die "Could not execute ($q):  $!\n\n";
         # Tell the other nodes that changes have been made
             $q = 'UPDATE settings SET data="yes" WHERE value="RecordChanged"';
@@ -158,14 +165,14 @@ package export::NUV_SQL;
         }
     # Copy the file
         else {
-            print "\nCopying $episode->{'filename'} to $self->{'export_path'}/$nuv_file\n";
+            print "\nCopying $episode->{'local_path'} to $self->{'export_path'}/$nuv_file\n";
         # use hard links when copying within a filesystem
-            if ((stat($episode->{'filename'}))[0] == (stat($self->{'path'}))[0]) {
-                link($episode->{'filename'}, "$self->{'export_path'}/$nuv_file")
+            if ((stat($episode->{'local_path'}))[0] == (stat($self->{'path'}))[0]) {
+                link($episode->{'local_path'}, "$self->{'export_path'}/$nuv_file")
                     or die "Couldn't hard link specified .nuv file:  $!\n\n";
             }
             else {
-                copy($episode->{'filename'}, "$self->{'export_path'}/$nuv_file")
+                copy($episode->{'local_path'}, "$self->{'export_path'}/$nuv_file")
                     or die "Couldn't copy specified .nuv file:  $!\n\n";
             }
         }

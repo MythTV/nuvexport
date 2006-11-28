@@ -32,6 +32,10 @@
     use Cwd 'abs_path';
     use lib dirname(abs_path($0 or $PROGRAM_NAME)), '/usr/share/nuvexport', '/usr/local/share/nuvexport';
 
+# Load the MythTV object
+    use MythTV;
+    our $Myth = new MythTV();
+
 # Load the myth and nuv utilities, and connect to the database
     use nuv_export::shared_utils;
     use nuv_export::cli;
@@ -118,10 +122,15 @@
     }
 
 # Load the recordings, and the $video_dir variable
-    load_recordings();
+    load_recordings($Myth);
 
 # Which exporter to use
-    $exporter = query_exporters($export_prog);
+    if (arg('only_save_info')) {
+        $exporter = export::NUV_SQL->new;
+    }
+    else {
+        $exporter = query_exporters($export_prog);
+    }
 
 # Load episodes from the commandline (and display/quit if this is search-only)
     @episodes = load_cli_episodes();
@@ -135,16 +144,21 @@
 # Encode right here?
     if (arg('noserver')) {
         foreach my $episode (@episodes) {
+        # Save the info?
+            if (arg('save_info') || arg('only_save_info')) {
+                $exporter->save_txt_details($episode);
+                next if (arg('only_save_info'));
+            }
         # Keep track of when we started
             if ($DEBUG) {
                 print "\n--------------------------------",
-                      "\nTo encode:  ", $episode->{'show_name'};
-                print ':  ', $episode->{'title'} if ($episode->{'title'});
+                      "\nTo encode:  ", $episode->{'title'};
+                print ':  ', $episode->{'subtitle'} if ($episode->{'subtitle'});
                 print "\nUse the following commands:\n";
             }
             else {
-                print "\nNow encoding:  ", $episode->{'show_name'};
-                print ':  ', $episode->{'title'} if ($episode->{'title'});
+                print "\nNow encoding:  ", $episode->{'title'};
+                print ':  ', $episode->{'subtitle'} if ($episode->{'subtitle'});
                 print "\nEncode started:  ".localtime()."\n";
             }
             my $start = time();
@@ -164,7 +178,7 @@
             my $minutes = int($seconds / 60);
             $timestr .= $minutes.'m ' if ($minutes > 0);
             $seconds  = $seconds % 60;
-        # Generate a nice
+        # Generate a nice time string
             $timestr .= $seconds.'s' if ($seconds > 0 || $timestr eq '');
         # Notify the user
             print "Encode lasted: $timestr\n" unless ($DEBUG);

@@ -20,9 +20,10 @@ Requires:  perl >= 5.6
 Requires:  perl-DateManip
 Requires:  perl-DBD-MySQL
 Requires:  perl-DBI
-Requires:  transcode  >= 0.6.12
-Requires:  ffmpeg     >= 0.4.9
-Requires:  mjpegtools >= 1.6.2
+Requires:  perl-MythTV >= 0.21
+Requires:  transcode   >= 0.6.12
+Requires:  ffmpeg      >= 0.4.9
+Requires:  mjpegtools  >= 1.6.2
 Requires:  mplayer
 
 Requires:  /usr/bin/id3tag

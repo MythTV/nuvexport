@@ -194,9 +194,9 @@ package export::ffmpeg::MP4;
             $self->{'out_fps'} = ($self->{'width'} > 320 || $self->{'height'} > 288) ? 29.97 : 23.97;
         }
     # Embed the title
-        $safe_title = $episode->{'show_name'};
-        if ($episode->{'title'} ne 'Untitled') {
-            $safe_title .= ' - '.$episode->{'title'};
+        $safe_title = $episode->{'title'};
+        if ($episode->{'subtitle'} ne 'Untitled') {
+            $safe_title .= ' - '.$episode->{'subtitle'};
         }
         my $safe_title = shell_escape($safe_title);
     # Build the common ffmpeg string

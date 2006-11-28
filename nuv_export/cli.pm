@@ -150,6 +150,8 @@ package nuv_export::cli;
 
     add_arg('profile=s',                   'nuvexportrc profile to load');
 
+    add_arg('save_info',                   'Save text file with program details.');
+    add_arg('only_save_info',              'ONLY save program details; do not encode.');
 
 # Load the commandline options
     add_arg('help:s',                      'Show nuvexport help');

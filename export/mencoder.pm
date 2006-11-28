@@ -85,7 +85,11 @@ package export::mencoder;
             }
         # Here, we have to fork off a copy of mythtranscode (need to use --fifosync with mencoder? needs testing)
             my $mythtranscode_bin = find_program('mythtranscode');
-            $mythtranscode = "$NICE $mythtranscode_bin --showprogress -p $episode->{'transcoder'} -c $episode->{'channel'} -s $episode->{'start_time_sep'} -f \"/tmp/fifodir_$$/\"";
+            $mythtranscode = "$NICE $mythtranscode_bin --showprogress"
+                            ." -p '$episode->{'transcoder'}'"
+                            ." -c '$episode->{'chanid'}'"
+                            ." -s '".unix_to_myth_time($episode->{'recstartts'})."'"
+                            ." -f \"/tmp/fifodir_$$/\"";
         # On no-audio encodes, we need to do something to keep mythtranscode's audio buffers from filling up available RAM
         #    $mythtranscode .= ' --fifosync' if ($skip_audio);
         # let mythtranscode handle the cutlist
@@ -93,7 +97,7 @@ package export::mencoder;
         }
     # Figure out the input files
         if ($episode->{'finfo'}{'is_mpeg'} && !$self->{'use_cutlist'}) {
-            $mencoder .= " -idx $episode->{'filename'} ";
+            $mencoder .= ' -idx '.shell_safe($episode->{'local_path'});
         }
         else {
             $mencoder .= " -noskip -idx /tmp/fifodir_$$/vidout -audiofile /tmp/fifodir_$$/audout  "

@@ -30,6 +30,7 @@ package export::ffmpeg;
     use nuv_export::cli;
     use nuv_export::ui;
     use mythtv::recordings;
+    use MythTV;
 
 # In case people would rather use yuvdenoise to deinterlace
     add_arg('deint_in_yuvdenoise|deint-in-yuvdenoise!', 'Deinterlace in yuvdenoise instead of ffmpeg');
@@ -197,7 +198,11 @@ package export::ffmpeg;
 
     # Here, we have to fork off a copy of mythtranscode (Do not use --fifosync with ffmpeg or it will hang)
         my $mythtranscode_bin = find_program('mythtranscode');
-        $mythtranscode = "$NICE $mythtranscode_bin --showprogress -p $episode->{'transcoder'} -c $episode->{'channel'} -s $episode->{'start_time_sep'} -f \"/tmp/fifodir_$$/\"";
+        $mythtranscode = "$NICE $mythtranscode_bin --showprogress"
+                        ." -p '$episode->{'transcoder'}'"
+                        ." -c '$episode->{'chanid'}'"
+                        ." -s '".unix_to_myth_time($episode->{'recstartts'})."'"
+                        ." -f \"/tmp/fifodir_$$/\"";
         $mythtranscode .= ' --honorcutlist' if ($self->{'use_cutlist'});
         $mythtranscode .= ' --fifosync'     if ($self->{'audioonly'} || $firstpass);
 

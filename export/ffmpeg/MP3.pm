@@ -83,12 +83,12 @@ package export::ffmpeg::MP3;
     # Execute ffmpeg
         $self->SUPER::export($episode, '.mp3');
     # Now tag it
-        my $safe_title       = shell_escape($episode->{'title'});
-        my $safe_channel     = shell_escape($episode->{'channel'});
+        my $safe_subtitle    = shell_escape($episode->{'subtitle'});
+        my $safe_channel     = shell_escape($episode->{'callsign'}.', '.$episode->{'channame'});
         my $safe_description = shell_escape($episode->{'description'});
-        my $safe_show_name   = shell_escape($episode->{'show_name'});
+        my $safe_title       = shell_escape($episode->{'title'});
         my $safe_outfile     = shell_escape($self->get_outfile($episode, '.mp3'));
-        my $command = "id3tag -A $safe_title -a $safe_channel -c $safe_description -s $safe_show_name $safe_outfile";
+        my $command = "id3tag -A $safe_subtitle -a $safe_channel -c $safe_description -s $safe_title $safe_outfile";
         system($command);
     }
 
