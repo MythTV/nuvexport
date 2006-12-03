@@ -138,7 +138,7 @@ package export::ffmpeg::DVD;
         $self->{'height'} = ($standard eq 'PAL') ? '576' : '480';
         $self->{'out_fps'} = ($standard eq 'PAL') ? 25 : 29.97;
     # Build the ffmpeg string
-        $self->{'ffmpeg_xtra'} = ' -b ' . $self->{'v_bitrate'}
+        $self->{'ffmpeg_xtra'} = $self->param('bit_rate', $self->{'v_bitrate'})
                                . ' -vcodec mpeg2video'
                                . ' -qmin ' . $self->{'quantisation'}
                                . ' -ab ' . $self->{'a_bitrate'}

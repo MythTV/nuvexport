@@ -142,7 +142,7 @@ package export::ffmpeg::XviD;
         my $safe_title = shell_escape($safe_title);
     # Build the common ffmpeg string
         my $ffmpeg_xtra  = ' -vcodec xvid'
-                          .' -b '.$self->{'v_bitrate'}
+                          .$self->param('bit_rate', $self->{'v_bitrate'})
                           .($self->{'vbr'}
                             ? ' -bt 32 -minrate 32 -maxrate '.(2*$self->{'v_bitrate'})
                              .' -bufsize 65535'

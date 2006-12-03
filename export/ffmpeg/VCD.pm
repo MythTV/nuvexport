@@ -76,7 +76,8 @@ package export::ffmpeg::VCD;
         $self->{'height'} = ($standard eq 'PAL') ? '288' : '240';
         $self->{'out_fps'} = ($standard eq 'PAL') ? 25 : 29.97;
     # Build the transcode string
-        $self->{'ffmpeg_xtra'}  = " -b 1150 -vcodec mpeg1video"
+        $self->{'ffmpeg_xtra'}  = $self->param('bit_rate', 1150)
+                                 ." -vcodec mpeg1video"
                                  ." -ab 224 -ar 44100 -acodec mp2"
                                  ." -f vcd";
     # Execute the parent method

@@ -130,7 +130,7 @@ package export::ffmpeg::ASF;
         # First pass
             print "First pass...\n";
             $self->{'ffmpeg_xtra'} = ' -vcodec msmpeg4'
-                                   . ' -b ' . $self->{'v_bitrate'}
+                                   . $self->param('bit_rate', $self->{'v_bitrate'})
                                    . ' -minrate 32 -maxrate '.(2*$self->{'v_bitrate'}).' -bt 32'
                                    . ' -bufsize 65535'
 #                                   . ' -lumi_mask 0.05 -dark_mask 0.02 -scplx_mask 0.7'

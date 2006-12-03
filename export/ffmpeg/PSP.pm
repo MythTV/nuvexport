@@ -167,7 +167,7 @@ package export::ffmpeg::PSP;
         $self->{'aspect_stretched'} = 1;
     # Build the ffmpeg string
         my $safe_title = shell_escape($episode->{'title'}.' - '.$episode->{'subtitle'});
-        $self->{'ffmpeg_xtra'}  = ' -b ' . $self->{'v_bitrate'}
+        $self->{'ffmpeg_xtra'}  = $self->param('bit_rate', $self->{'v_bitrate'})
                                  .' -bufsize 65535'
                                  .' -ab 32 -acodec aac'
                                  ." -f psp -title $safe_title";
