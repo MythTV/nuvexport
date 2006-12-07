@@ -52,27 +52,24 @@ package export::NUV_SQL;
 # Gather settings from the user
     sub gather_settings {
         my $self = shift;
-    # Only ask for data if we're actually extracting a file
-        if (!arg('only_save_info')) {
-        # Let the user know what's going on
-            print "\nYou have chosen to extract the .nuv.\n"
-                 ."This will extract it from the MythTV database into .nuv and .sql \n"
-                 ."files to import into another MythTV installation.\n\n";
-        # Make sure the user knows what he/she is doing
-            $self->{'delete'} = query_text("Do you want to remove it from this server when finished?",
+    # Let the user know what's going on
+        print "\nYou have chosen to extract the .nuv.\n"
+             ."This will extract it from the MythTV database into .nuv and .sql \n"
+             ."files to import into another MythTV installation.\n\n";
+    # Make sure the user knows what he/she is doing
+        $self->{'delete'} = query_text("Do you want to remove it from this server when finished?",
+                                       'yesno',
+                                       $self->{'delete'} ? 'Yes' : 'No');
+    # Make EXTRA sure
+        if ($self->{'delete'}) {
+            $self->{'delete'} = query_text("\nAre you ".colored('sure', 'bold').' you want to remove it from this server?',
                                            'yesno',
-                                           $self->{'delete'} ? 'Yes' : 'No');
-        # Make EXTRA sure
-            if ($self->{'delete'}) {
-                $self->{'delete'} = query_text("\nAre you ".colored('sure', 'bold').' you want to remove it from this server?',
-                                               'yesno',
-                                               'No');
-            }
-        # Create a directory with the show name
-            $self->{'create_dir'} = query_text('Store exported files in a directory with the show name?',
-                                               'yesno',
-                                               $self->{'create_dir'} ? 'Yes' : 'No');
+                                           'No');
         }
+    # Create a directory with the show name
+        $self->{'create_dir'} = query_text('Store exported files in a directory with the show name?',
+                                           'yesno',
+                                           $self->{'create_dir'} ? 'Yes' : 'No');
     # Load the save path, if requested
         $self->{'path'} = query_savepath($self->val('path'));
     }

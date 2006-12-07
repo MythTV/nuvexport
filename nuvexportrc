@@ -101,6 +101,12 @@
 #   crop_bottom = 2
 #   crop_left   = 2
 
+#
+#  Export a matching .txt file, which mythvideo can use to import information
+#  about your exports, since it likely can't look them up in imdb.
+#
+    save_info = yes
+
 </nuvexport>
 
 #

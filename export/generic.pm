@@ -196,68 +196,23 @@ package export::generic;
         my $self    = shift;
         my $episode = shift;
         my $suffix  = ($self->{'suffix'} or shift);
-    # Build a clean filename
-        my $outfile;
-        if ($episode->{'outfile'}{$suffix}) {
-            $outfile = $episode->{'outfile'}{$suffix};
-        }
-        else {
-        # Specified a name format
-            if ($outfile = $self->val('filename')) {
-            # Generate a list
-                my %field;
-                ($field{'c'} = ($episode->{'chanid'}      or '')) =~ s/%/%%/g;
-                ($field{'a'} = ($episode->{'showtime'}    or '')) =~ s/%/%%/g;
-                ($field{'b'} = ($episode->{'endtime'}     or '')) =~ s/%/%%/g;
-                ($field{'t'} = ($episode->{'title'}       or '')) =~ s/%/%%/g;  # title
-                ($field{'s'} = ($episode->{'subtitle'}    or '')) =~ s/%/%%/g;  # subtitle/episode
-                ($field{'h'} = ($episode->{'host'}        or '')) =~ s/%/%%/g;
-                ($field{'m'} = ($episode->{'showtime'}    or '')) =~ s/%/%%/g;
-                ($field{'d'} = ($episode->{'description'} or '')) =~ s/%/%%/g;
-            # Make the substitution
-                my $keys = join('', sort keys %field);
-                $outfile =~ s/(?<!%)(?:%([$keys]))/$field{$1}/g;
-                $outfile =~ s/%%/%/g;
+    # Specified a name format
+        my $outfile = $self->val('filename');
+           $outfile ||= '%T - %S';
+    # Format
+        $outfile = $episode->format_name($outfile, '-', '-', 0, $self->val('underscores'));
+    # Avoid some "untitled" messiness
+        $outfile =~ s/\s+-\s+Untitled//sg;
+    # Make sure we don't have a duplicate filename
+        if (-e $self->{'path'}.'/'.$outfile.$suffix) {
+            my $count = 1;
+            my $out   = $outfile;
+            while (-e $self->{'path'}.'/'.$out.$suffix) {
+                $count++;
+                $out = "$outfile.$count";
             }
-        # Default format
-            else {
-                if ($episode->{'title'} ne 'Untitled' and $episode->{'subtitle'} ne 'Untitled') {
-                    $outfile = $episode->{'title'}.' - '.$episode->{'subtitle'};
-                }
-                elsif($episode->{'title'} ne 'Untitled') {
-                    $outfile = $episode->{'title'};
-                }
-                elsif($episode ne 'Untitled') {
-                    $outfile = $episode->{'subtitle'};
-                }
-                else {
-                    $outfile = 'Untitled';
-                }
-            }
-        # Some basic cleanup for illegal (windows) filename characters, etc.
-            $outfile =~ tr/\ \t\r\n/ /s;
-            $outfile =~ tr/"/'/s;
-            $outfile =~ s/(?:[\-\/\\:*?<>|]+\s*)+(?=[^\d\s])/- /sg;
-            $outfile =~ tr/\/\\:*?<>|/-/;
-            $outfile =~ s/^[\-\ ]+//s;
-            $outfile =~ s/[\-\ ]+$//s;
-        # add underscores?
-            if ($self->val('underscores')) {
-                $outfile =~ tr/ /_/s;
-            }
-        # Make sure we don't have a duplicate filename
-            if (-e $self->{'path'}.'/'.$outfile.$suffix) {
-                my $count = 1;
-                my $out   = $outfile;
-                while (-e $self->{'path'}.'/'.$out.$suffix) {
-                    $count++;
-                    $out = "$outfile.$count";
-                }
-                $outfile = $out;
-           }
-        # Store it so we don't have to recalculate this next time
-            $episode->{'outfile'}{$suffix} = $outfile;
-        }
+            $outfile = $out;
+       }
     # return
         return $self->{'path'}.'/'.$outfile.$suffix;
     }
@@ -306,29 +261,6 @@ package export::generic;
             print "Height must be a multiple of 16.\n";
             $self->{'height'} = int(($h + 8) / 16) * 16;
         }
-    }
-
-# Save program details
-    sub save_txt_details {
-        my $self       = shift;
-        my $episode    = shift;
-        my $outfile    = $self->get_outfile($episode, '.txt');
-    # Some clean versions of the various fields
-        my $clean_desc = $episode->{'description'};
-            $clean_desc =~ tr/\n/ /;
-        my $clean_subtitle = $episode->{'subtitle'};
-            $clean_subtitle = '' if ($clean_subtitle eq 'Untitled');
-    # Save the file
-        print "Saving details to:  $outfile\n";
-        open(DATA, ">$outfile") or die "Can't create $outfile:  $!\n";
-        print DATA <<EOF;
-      title: $episode->{'title'}
-   subtitle: $clean_subtitle
-description: $clean_desc
-    channel: $episode->{'callsign'}, $episode->{'channame'}
-    airdate: $episode->{'showtime'}
-EOF
-        close DATA;
     }
 
 # This subroutine forks and executes one system command - nothing fancy

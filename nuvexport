@@ -37,6 +37,7 @@
     our $Myth = new MythTV();
 
 # Load the myth and nuv utilities, and connect to the database
+    use Date::Manip;
     use nuv_export::shared_utils;
     use nuv_export::cli;
     use nuv_export::ui;
@@ -146,7 +147,27 @@
         foreach my $episode (@episodes) {
         # Save the info?
             if (arg('save_info') || arg('only_save_info')) {
-                $exporter->save_txt_details($episode);
+                my $outfile = $exporter->get_outfile($episode, '.txt');
+                open(DATA, ">$outfile") or die "Can't create $outfile:  $!\n";
+                print DATA join("\n", 'title:       '.$episode->{'title'},
+                                      'subtitle:    '.($episode->{'subtitle'}    eq 'Untitled'       ? '' : $episode->{'subtitle'}),
+                                      'description: '.($episode->{'description'} eq 'No Description' ? '' : $episode->{'description'}),
+                                      'starttime:   '.UnixDate("epoch $episode->{'starttime'}", '%O'),
+                                      'endtime:     '.UnixDate("epoch $episode->{'endtime'}", '%O'),
+                                      'category:    '.$episode->{'category'},
+                                      'chanid:      '.$episode->{'chanid'},
+                                      'channum:     '.$episode->{'channum'},
+                                      'callsign:    '.$episode->{'callsign'},
+                                      'channame:    '.$episode->{'channame'},
+                                      'airdate:     '.UnixDate("epoch $episode->{'airdate'}", '%O'),
+                                      'stars:       '.(4 * $episode->{'stars'}),
+                                      'recgroup:    '.$episode->{'recgroup'},
+                                      'seriesid:    '.$episode->{'seriesid'},
+                                      'programid:   '.$episode->{'programid'},
+                                      ''
+                               );
+                close DATA;
+            # Skip ahead if we're not supposed to actually export recordings
                 next if (arg('only_save_info'));
             }
         # Keep track of when we started
