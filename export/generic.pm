@@ -16,6 +16,7 @@ package export::generic;
     use nuv_export::shared_utils;
     use nuv_export::cli;
     use nuv_export::ui;
+    use MythTV;
 
     BEGIN {
         use Exporter;

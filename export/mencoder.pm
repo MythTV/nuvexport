@@ -20,6 +20,7 @@ package export::mencoder;
     use nuv_export::cli;
     use nuv_export::ui;
     use mythtv::recordings;
+    use MythTV;
 
 # Check for mencoder
     sub init_mencoder {

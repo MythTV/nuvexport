@@ -18,6 +18,7 @@ package nuv_export::ui;
     use nuv_export::cli;
     use mythtv::recordings;
     use Date::Manip;
+    use MythTV;
 
     BEGIN {
         use Exporter;

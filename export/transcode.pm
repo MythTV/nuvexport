@@ -21,6 +21,7 @@ package export::transcode;
     use nuv_export::cli;
     use nuv_export::ui;
     use mythtv::recordings;
+    use MythTV;
 
 # Load the following extra parameters from the commandline
     add_arg('zoom_filter:s',          'Which zoom filter to use.');
