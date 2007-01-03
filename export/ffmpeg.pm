@@ -403,7 +403,7 @@ package export::ffmpeg;
                     }
                 }
             # ffmpeg warnings?
-                elsif ($l =~ /^Unknown.+?(codec|format)/m) {
+                elsif ($l =~ /^Un(known|supported).+?(codec|format)/m) {
                     $warnings .= $l;
                     die "\n\nffmpeg had critical errors:\n\n$warnings";
                 }
