@@ -44,8 +44,8 @@ package export::transcode::DVD;
         $self->init_transcode();
 
     # Make sure that we have an mplexer
-        find_program('tcmplex')
-            or push @{$self->{'errors'}}, 'You need tcmplex to export a dvd.';
+        find_program('mplex')
+            or push @{$self->{'errors'}}, 'You need mplex to export a dvd.';
 
     # Any errors?  disable this function
         $self->{'enabled'} = 0 if ($self->{'errors'} && @{$self->{'errors'}} > 0);
@@ -134,7 +134,6 @@ package export::transcode::DVD;
         $self->{'width'} = 720;
         $self->{'height'} = ($standard eq 'PAL') ? '576' : '480';
         $self->{'out_fps'} = ($standard eq 'PAL') ? 25 : 29.97;
-        my $ntsc = ($standard eq 'PAL') ? '' : '-N';
     # Build the transcode string
         $self->{'transcode_xtra'} = " -y mpeg2enc,mp2enc"
                                    .' -F 8,"-q '.$self->{'quantisation'}
@@ -146,10 +145,10 @@ package export::transcode::DVD;
     # Execute the parent method
         $self->SUPER::export($episode, ".$$");
     # Multiplex the streams
-        my $command = "$NICE tcmplex -m d $ntsc"
-                      .' -i '.shell_escape($self->get_outfile($episode, ".$$.m2v"))
-                      .' -p '.shell_escape($self->get_outfile($episode, ".$$.mpa"))
-                      .' -o '.shell_escape($self->get_outfile($episode, '.mpg'));
+        my $command = "$NICE mplex -f 8 -V"
+                      .' -o '.shell_escape($self->get_outfile($episode, '.mpg'))
+                      .' '.shell_escape($self->get_outfile($episode, ".$$.m2v"))
+                      .' '.shell_escape($self->get_outfile($episode, ".$$.mpa"));
         system($command);
     }
 

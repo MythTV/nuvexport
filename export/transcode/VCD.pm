@@ -37,8 +37,8 @@ package export::transcode::VCD;
         $self->init_transcode();
 
     # Make sure that we have an mplexer
-        find_program('tcmplex')
-            or push @{$self->{'errors'}}, 'You need tcmplex to export a vcd.';
+        find_program('mplex')
+            or push @{$self->{'errors'}}, 'You need mplex to export a vcd.';
 
     # Any errors?  disable this function
         $self->{'enabled'} = 0 if ($self->{'errors'} && @{$self->{'errors'}} > 0);
@@ -102,11 +102,10 @@ package export::transcode::VCD;
             print "Not splitting because combined file size of chunks is < ".(0.97 * $self->{'split_every'} * 1024 * 1024).", which is the requested split size.\n";
         }
     # Multiplex the streams
-        my $command = "$NICE tcmplex -m v $ntsc"
-                      .($split_file ? ' -F '.shell_escape($split_file) : '')
-                      .' -i '.shell_escape($self->get_outfile($episode, ".$$.m1v"))
-                      .' -p '.shell_escape($self->get_outfile($episode, ".$$.mpa"))
-                      .' -o '.shell_escape($self->get_outfile($episode, $split_file ? '..mpg' : '.mpg'));
+        my $command = "$NICE mplex -f 1 -C"
+                      .' -o '.shell_escape($self->get_outfile($episode, $split_file ? '.%d.mpg' : '.mpg'));
+                      .' '.shell_escape($self->get_outfile($episode, ".$$.m1v"))
+                      .' '.shell_escape($self->get_outfile($episode, ".$$.mpa"));
         system($command);
     }
 

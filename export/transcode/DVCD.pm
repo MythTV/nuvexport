@@ -37,8 +37,8 @@ package export::transcode::DVCD;
         $self->init_transcode();
 
     # Make sure that we have an mplexer
-        find_program('tcmplex')
-            or push @{$self->{'errors'}}, 'You need tcmplex to export a dvcd.';
+        find_program('mplex')
+            or push @{$self->{'errors'}}, 'You need mplex to export a dvcd.';
 
     # Any errors?  disable this function
         $self->{'enabled'} = 0 if ($self->{'errors'} && @{$self->{'errors'}} > 0);
@@ -81,10 +81,10 @@ package export::transcode::DVCD;
     # Execute the parent method
         $self->SUPER::export($episode, ".$$");
     # Multiplex the streams
-        my $command = "$NICE tcmplex -m v $ntsc"
-                      .' -i '.shell_escape($self->get_outfile($episode, ".$$.m1v"))
-                      .' -p '.shell_escape($self->get_outfile($episode, ".$$.mpa"))
-                      .' -o '.shell_escape($self->get_outfile($episode, '.mpg'));
+        my $command = "$NICE mplex -f 1 -C"
+                      .' -o '.shell_escape($self->get_outfile($episode, '.mpg'))
+                      .' '.shell_escape($self->get_outfile($episode, ".$$.m1v"))
+                      .' '.shell_escape($self->get_outfile($episode, ".$$.mpa"));
         system($command);
     }
 
