@@ -172,7 +172,7 @@ package export::transcode::SVCD;
         }
     # Multiplex the streams
         my $command = "$NICE mplex -f 4 -V"
-                      .' -o '.shell_escape($self->get_outfile($episode, $split_file ? '.%d.mpg' : '.mpg'));
+                      .' -o '.shell_escape($self->get_outfile($episode, $split_file ? '.%d.mpg' : '.mpg'))
                       .' '.shell_escape($self->get_outfile($episode, ".$$.m2v"))
                       .' '.shell_escape($self->get_outfile($episode, ".$$.mpa"));
         system($command);
