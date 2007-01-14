@@ -88,7 +88,7 @@ package export::ffmpeg;
     # Audio only?
         $self->{'audioonly'} = $audioonly;
     # Load the parameter version?
-        $data = `ffmpeg -h 2>&1`;
+        $data = `$ffmpeg -h 2>&1`;
         if ($data =~ /bit_rate_tolerance/) {
             $self->{'ffmpeg_param_vers'} = 0;
         }
