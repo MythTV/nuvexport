@@ -431,9 +431,11 @@ package export::ffmpeg;
         # Read from the mythtranscode handle?
             while (has_data($mythtrans_h) and $l = <$mythtrans_h>) {
                 if ($l =~ /Processed:\s*(\d+)\s*of\s*(\d+)\s*frames\s*\((\d+)\s*seconds\)/) {
-                    #if ($self->{'audioonly'}) {
-                    #    $frames = int($1);
-                    #}
+                # ffmpeg doesn't report fame counts for audio streams, so grab it here.
+                    if ($self->{'audioonly'}) {
+                        $frames = int($1);
+                    }
+                # mythtranscode is going to be the most accurate total frame count.
                     my $total = $2 - $episode->{'cutlist_frames'};
                     if ($episode->{'total_frames'} < $total) {
                         $episode->{'total_frames'} = $total;
