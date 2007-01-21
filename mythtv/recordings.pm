@@ -62,7 +62,14 @@ package mythtv::recordings;
         # Load into an object
             $file = $Myth->new_recording(@$file);
         # Skip shows without cutlists?
-            next if (arg('require_cutlist') && !$file->{'has_cutlist'});
+            if (arg('require_cutlist') && !$file->{'has_cutlist'}) {
+                if (arg('infile')) {
+                    print STDERR "WARNING:  Overriding --require_cutlist because file was requested with --infile.\n";
+                }
+                else {
+                    next;
+                }
+            }
         # Skip files that aren't local (until file info is stored in the db)
             next unless ($file->{'local_path'} && -e $file->{'local_path'});
         # Defaults
