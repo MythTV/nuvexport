@@ -144,7 +144,11 @@ package export::generic;
                         print "Crop percentage must be between 0 and 5 percent.\n";
                     }
                     else {
-                        $self->{'crop_pct'} = $pct;
+                        $self->{'crop_pct'}      =
+                          $self->{'crop_top'}    =
+                          $self->{'crop_right'}  =
+                          $self->{'crop_bottom'} =
+                          $self->{'crop_left'}   = $pct;
                         last;
                     }
                 }
@@ -155,7 +159,7 @@ package export::generic;
                     while (1) {
                         my $pct = query_text("Crop broadcast overscan $side border (0-5\%) ?",
                                              'float',
-                                             $self->{"crop_$side"});
+                                             $self->val("crop_$side"));
                         if ($pct < 0 || $pct > 5) {
                             print "Crop percentage must be between 0 and 5 percent.\n";
                         }
