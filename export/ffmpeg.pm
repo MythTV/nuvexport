@@ -264,18 +264,10 @@ package export::ffmpeg;
         # The output is actually a stretched/anamorphic aspect ratio
         # (like 480x480 for SVCD, which is 4:3)
             if ($self->{'aspect_stretched'}) {
-            # Stretch the width to the full aspect ratio for calculating
-                $width = int($self->{'height'} * $self->{'out_aspect'} + 0.5);
-            # Calculate the height required to keep the source in aspect
-                $height = $width / $episode->{'finfo'}{'aspect_f'};
-            # Round to nearest even number
-                $height = int(($height + 2) / 4) * 4;
-            # Calculate how much to pad the height (both top & bottom)
-                $pad_h = int(($self->{'height'} - $height) / 2);
-            # Set the real width again
-                $width = $self->{'width'};
-            # No padding on the width
-                $pad_w = 0;
+                $width  = $self->{'width'};
+                $height = $self->{'height'};
+                $pad_h  = 0;
+                $pad_w  = 0;
             }
         # The output will need letter/pillarboxing
             else {

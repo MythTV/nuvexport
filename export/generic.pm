@@ -41,10 +41,11 @@ package export::generic;
     add_arg('fast_denoise|fast-denoise!',    'Use fast noise reduction instead of standard.');
     add_arg('nocrop',                        'Do not crop out broadcast overscan.');
     add_arg('crop_pct=f',                    'Percentage of overscan to crop (0-5%, defaults to 2%).');
-    add_arg('crop_top=f',                    'Percentage of overscan to crop from the top.');
+    add_arg('crop_top=f',                    'Percentage of overscan to crop from the top. (0-20%)');
     add_arg('crop_right=f',                  'Percentage of overscan to crop from the right.');
-    add_arg('crop_bottom=f',                 'Percentage of overscan to crop from the top.');
+    add_arg('crop_bottom=f',                 'Percentage of overscan to crop from the bottom. (0-20%)');
     add_arg('crop_left=f',                   'Percentage of overscan to crop from the left.');
+    add_arg('out_aspect=s',                  'Force output aspect ratio.');
 
 # Load defaults
     sub load_defaults {
@@ -85,14 +86,14 @@ package export::generic;
             if ($self->val('crop_pct') < 0 || $self->val('crop_pct') > 5) {
                 die "crop_pct must be a number between 0 and 5.\n";
             }
-            if ($self->val('crop_top') < 0 || $self->val('crop_top') > 5) {
-                die "crop_top must be a number between 0 and 5.\n";
+            if ($self->val('crop_top') < 0 || $self->val('crop_top') > 20) {
+                die "crop_top must be a number between 0 and 20.\n";
             }
             if ($self->val('crop_right') < 0 || $self->val('crop_right') > 5) {
                 die "crop_right must be a number between 0 and 5.\n";
             }
-            if ($self->val('crop_bottom') < 0 || $self->val('crop_bottom') > 5) {
-                die "crop_bottom must be a number between 0 and 5.\n";
+            if ($self->val('crop_bottom') < 0 || $self->val('crop_bottom') > 20) {
+                die "crop_bottom must be a number between 0 and 20.\n";
             }
             if ($self->val('crop_left') < 0 || $self->val('crop_left') > 5) {
                 die "crop_left must be a number between 0 and 5.\n";
@@ -103,6 +104,23 @@ package export::generic;
                     || $self->{'crop_bottom'} || $self->{'crop_left'}) {
                 $self->{'crop'} = 1;
             }
+        }
+    # Clean up the aspect override, if one was passed in
+        if ($self->val('out_aspect')) {
+            $self->{'aspect_stretched'} = 1;
+            my $aspect = $self->{'out_aspect'};
+        # European decimals...
+            $aspect =~ s/\,/\./;
+        # In ratio format -- do the math
+            if ($aspect =~ /^\d+:\d+$/) {
+                my ($w, $h) = split /:/, $aspect;
+                $aspect = $w / $h;
+            }
+        # Parse out decimal formats
+            elsif ($aspect eq '1')     { $aspect =  1;     }
+            elsif ($aspect =~ m/^1.3/) { $aspect =  4 / 3; }
+            elsif ($aspect =~ m/^1.7/) { $aspect = 16 / 9; }
+            $self->{'out_aspect'} = $aspect;
         }
     }
 
@@ -157,11 +175,12 @@ package export::generic;
             else {
                 foreach my $side ('top', 'right', 'bottom', 'left') {
                     while (1) {
+                        my $max = ($side eq 'top' || $side eq 'bottom') ? 20 : 5;
                         my $pct = query_text("Crop broadcast overscan $side border (0-5\%) ?",
                                              'float',
                                              $self->val("crop_$side"));
-                        if ($pct < 0 || $pct > 5) {
-                            print "Crop percentage must be between 0 and 5 percent.\n";
+                        if ($pct < 0 || $pct > $max) {
+                            print "Crop percentage must be between 0 and $max percent.\n";
                         }
                         else {
                             $self->{"crop_$side"} = $pct;
