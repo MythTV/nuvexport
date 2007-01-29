@@ -250,7 +250,7 @@ package export::transcode;
         }
     # Is an mpeg
         else {
-            $transcode .= ' -i '.shell_safe($episode->{'local_path'}).' -x ';
+            $transcode .= ' -i '.shell_escape($episode->{'local_path'}).' -x ';
             if ($episode->{'finfo'}{'mpeg_stream_type'} eq 'mpegpes') {
                 $transcode .= 'vob';
             }

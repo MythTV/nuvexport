@@ -98,7 +98,7 @@ package export::mencoder;
         }
     # Figure out the input files
         if ($episode->{'finfo'}{'is_mpeg'} && !$self->{'use_cutlist'}) {
-            $mencoder .= ' -idx '.shell_safe($episode->{'local_path'});
+            $mencoder .= ' -idx '.shell_escape($episode->{'local_path'});
         }
         else {
             $mencoder .= " -noskip -idx /tmp/fifodir_$$/vidout -audiofile /tmp/fifodir_$$/audout  "
