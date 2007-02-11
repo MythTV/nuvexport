@@ -70,7 +70,7 @@ package export::ffmpeg;
     # Check the ffmpeg version
         if (!defined $self->{'ffmpeg_vers'}) {
             $data = `$ffmpeg -version 2>&1`;
-            if ($data =~ m/ffmpeg\version\s0.4.9-\d+_r(\d+)\.\w+\.at/si) {
+            if ($data =~ m/ffmpeg\sversion\s0.4.9-\d+_r(\d+)\.\w+\.at/si) {
                 $self->{'ffmpeg_vers'}  = 'svn';
                 $self->{'ffmpeg_build'} = $1;
             }
