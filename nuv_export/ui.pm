@@ -60,7 +60,7 @@ package nuv_export::ui;
         # Filename specified on the command line -- extract the chanid and starttime
             if (arg('infile')) {
             # Try to pick out the chanid and starttime from the database
-                my $sh = $dbh->prepare('SELECT chanid, UNIX_TIMESTAMP(starttime) FROM recorded WHERE basename=?');
+                my $sh = $Myth->{'dbh'}->prepare('SELECT chanid, UNIX_TIMESTAMP(starttime) FROM recorded WHERE basename=?');
                 if ($sh) {
                 # Stip off the video directory so the basename will actually match
                     my $infile = arg('infile');

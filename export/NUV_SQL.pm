@@ -19,7 +19,6 @@ package export::NUV_SQL;
     use nuv_export::shared_utils;
     use nuv_export::cli;
     use nuv_export::ui;
-    use mythtv::db;
     use mythtv::recordings;
 
     sub new {
@@ -109,7 +108,7 @@ package export::NUV_SQL;
         print DATA "USE mythconverg;\n\n";
         foreach $table ('recorded', 'oldrecorded', 'recordedmarkup', 'recordedseek') {
             $q = "SELECT * FROM $table WHERE chanid=? AND starttime=FROM_UNIXTIME(?)";
-            $sh = $dbh->prepare($q);
+            $sh = $Myth->{'dbh'}->prepare($q);
             $sh->execute($episode->{'chanid'}, $episode->{'starttime'})
                 or die "Count not execute ($q):  $!\n\n";
             my $count = 0;
@@ -146,17 +145,17 @@ package export::NUV_SQL;
         #
         # Remove the entry from recordedmarkup
             $q = 'DELETE FROM recordedmarkup WHERE chanid=? AND starttime=FROM_UNIXTIME(?)';
-            $sh = $dbh->prepare($q);
+            $sh = $Myth->{'dbh'}->prepare($q);
             $sh->execute($episode->{'chanid'}, $episode->{'starttime'})
                 or die "Could not execute ($q):  $!\n\n";
         # Remove this entry from the database
             $q = 'DELETE FROM recorded WHERE chanid=? AND starttime=FROM_UNIXTIME(?)';
-            $sh = $dbh->prepare($q);
+            $sh = $Myth->{'dbh'}->prepare($q);
             $sh->execute($episode->{'chanid'}, $episode->{'starttime'})
                 or die "Could not execute ($q):  $!\n\n";
         # Tell the other nodes that changes have been made
             $q = 'UPDATE settings SET data="yes" WHERE value="RecordChanged"';
-            $sh = $dbh->prepare($q);
+            $sh = $Myth->{'dbh'}->prepare($q);
             $sh->execute()
                 or die "Could not execute ($q):  $!\n\n";
         }

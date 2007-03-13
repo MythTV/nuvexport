@@ -20,7 +20,6 @@ package export::ffmpeg::MP4;
     use nuv_export::shared_utils;
     use nuv_export::cli;
     use nuv_export::ui;
-    use mythtv::db;
     use mythtv::recordings;
 
 # Load the following extra parameters from the commandline

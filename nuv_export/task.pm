@@ -10,7 +10,6 @@ package nuv_export::task;
 
 # Load the myth and nuv utilities, and connect to the database
     use nuvexport::shared_utils;
-    use mythtv::db;
     use mythtv::recordings;
 
     BEGIN {
