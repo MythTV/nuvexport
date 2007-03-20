@@ -109,7 +109,7 @@ package export::NUV_SQL;
         foreach $table ('recorded', 'oldrecorded', 'recordedmarkup', 'recordedseek') {
             $q = "SELECT * FROM $table WHERE chanid=? AND starttime=FROM_UNIXTIME(?)";
             $sh = $Myth->{'dbh'}->prepare($q);
-            $sh->execute($episode->{'chanid'}, $episode->{'starttime'})
+            $sh->execute($episode->{'chanid'}, $episode->{'recstartts'})
                 or die "Count not execute ($q):  $!\n\n";
             my $count = 0;
             my @keys = undef;
