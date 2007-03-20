@@ -249,12 +249,13 @@ BEGIN {
             }
             elsif ($word =~ /\s/) {
                 next unless ($line);
-                if (length("$line$word$words[0]") > $chars) {
+                if (length("$line$word".($words[0] or '')) > $chars) {
                     $$text .= $line . "\n";
                     $line = $rindent;
                 }
                 else {
-                    $line .= $word . shift @words;
+                    $line .= $word;
+                    $line .= shift @words if ($words[0]);
                     $line .= shift @words if ($words[0] and $words[0] eq '-');
                 }
             }
