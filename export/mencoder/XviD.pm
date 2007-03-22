@@ -118,7 +118,7 @@ package export::mencoder::XviD;
         my $self    = shift;
         my $episode = shift;
     # Build the mencoder string
-        my $params = " -ovc xvid -vop scale=$self->{'width'}:$self->{'height'}"
+        my $params = " -ovc xvid -vf scale=$self->{'width'}:$self->{'height'}"
         #." -N 0x55" # make *sure* we're exporting mp3 audio
 
         #." -oac mp3lame -lameopts vbr=3:br=$self->{'a_bitrate'}"
@@ -137,8 +137,8 @@ package export::mencoder::XviD;
             print "First pass...\n";
             $self->{'mencoder_xtra'} = "  $params"
                                        ." -passlogfile /tmp/xvid.$$.log"
-                                       ." -nosound"
-                                       ." -xvidencopts bitrate=$self->{'v_bitrate'}:pass=1 ";
+                                       ." -oac copy"
+                                       ." -xvidencopts bitrate=$self->{'v_bitrate'}:pass=1:quant_type=mpeg:threads=2:keyframe_boost=10:kfthreshold=1:kfreduction=20 ";
             $self->SUPER::export($episode, '', 1);
         # Restore the path
             $self->{'path'} = $path_bak;
@@ -147,7 +147,7 @@ package export::mencoder::XviD;
             $self->{'mencoder_xtra'} = " $params"
                                        ." -oac mp3lame -lameopts vbr=3:br=$self->{'a_bitrate'}"
                                        ." -passlogfile /tmp/xvid.$$.log"
-                                       ." -xvidencopts bitrate=$self->{'v_bitrate'}:pass=2 ";
+                                       ." -xvidencopts bitrate=$self->{'v_bitrate'}:pass=2:quant_type=mpeg:threads=2:keyframe_boost=10:kfthreshold=1:kfreduction=20 ";
         }
     # Single pass
         else {

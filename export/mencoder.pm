@@ -50,13 +50,13 @@ package export::mencoder;
     sub build_vop_line{
         my $cmdline    = shift;
         my $vop        = '';
-        while($cmdline =~ m/.*?-vop\s+([^\s]+)\s/gs){
+        while ($cmdline =~ m/.*?-vf\s+([^\s]+)\s/gs){
             $vop .= ",$1";
         }
         $vop =~ s/^,+//;
         $vop =~ s/,+$//;
-        $cmdline =~ s/-vop\s+[^\s]+\s/ /g;
-        $cmdline .= " -vop $vop ";
+        $cmdline =~ s/-vf\s+[^\s]+\s/ /g;
+        $cmdline .= " -vf $vop ";
         return $cmdline;
     }
 
@@ -79,7 +79,7 @@ package export::mencoder;
     # Not an mpeg mencoder can not do cutlists (from what I can tell..)
         unless ($episode->{'finfo'}{'is_mpeg'} && !$self->{'use_cutlist'}) {
         # swap red/blue -- used with svcd, need to see if it's needed everywhere
-        #   $mencoder .= ' -vop rgb2bgr '; #this is broken in mencoder 1.0preX
+        #   $mencoder .= ' -vf rgb2bgr '; #this is broken in mencoder 1.0preX
         # Set up the fifo dirs?
             if (-e "/tmp/fifodir_$$/vidout" || -e "/tmp/fifodir_$$/audout") {
                 die "Possibly stale mythtranscode fifo's in /tmp/fifodir_$$/.\nPlease remove them before running nuvexport.\n\n";
@@ -109,10 +109,19 @@ package export::mencoder;
                          .':fps='.$episode->{'finfo'}{'fps'}
                          ;
         }
+    # Add any additional settings from the child module.
     # NOTE: this comes before the standard filters below, because
-    # mencoder applies filters in reverse
-    # Add any additional settings from the child module
+    # mencoder applies filters in reverse, and we want things like "scale" to
+    # run last.
         $mencoder .= ' '.$self->{'mencoder_xtra'};
+    # Filters (remember, mencoder reads these in reverse order (so deint should be last if used)
+    # Normally you would do -vf filter1=<val>,filter2=<val>,lavcdeint...
+        if ($self->{'noise_reduction'}) {
+            $mencoder .= " -vf denoise3d";
+        }
+        if ($self->{'deinterlace'}) {
+            $mencoder .= " -vf lavcdeint";
+        }
     # Crop?
         if ($self->{'crop'}) {
             my $t = sprintf('%.0f', ($self->val('crop_top')    / 100) * $episode->{'finfo'}{'height'});
@@ -127,18 +136,7 @@ package export::mencoder;
         # Figure out the new width/height
             my $w = $episode->{'finfo'}{'width'}  - $r - $l;
             my $h = $episode->{'finfo'}{'height'} - $t - $b;
-            $mencoder .= " -vop crop=$w:$h:$l:$t " if ($t || $r || $b || $l);
-        }
-    # Use the cutlist?  (only for mpeg files -- nuv files are handled by mythtranscode)
-    # Can we cut with mencoder?
-    # Filters (remember, mencoder reads these in reverse order (so deint should be last if used)
-    # Normally you would do -vop filter1=<val>,filter2=<val>,lavcdeint...
-        if ($self->{'noise_reduction'}) {
-            $mencoder .= " -vf denoise3d";
-        }
-        if ($self->{'deinterlace'}) {
-            $mencoder .= " -vf lavcdeint";
-            #smartyuv|smartdeinter|dilyuvmmx
+            $mencoder .= " -vf crop=$w:$h:$l:$t " if ($t || $r || $b || $l);
         }
     # Output directory set to null means the first pass of a multipass
         if (!$self->{'path'} || $self->{'path'} =~ /^\/dev\/null\b/) {
@@ -159,7 +157,7 @@ package export::mencoder;
             fifos_wait("/tmp/fifodir_$$/");
             push @tmpfiles, "/tmp/fifodir_$$", "/tmp/fifodir_$$/audout", "/tmp/fifodir_$$/vidout";
         }
-    #Fix -vop options before we execute mencoder
+    #Fix -vf options before we execute mencoder
         $mencoder = build_vop_line($mencoder);
     # Execute mencoder
         print "Starting mencoder.\n" unless ($DEBUG);
