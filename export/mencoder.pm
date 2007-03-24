@@ -109,19 +109,6 @@ package export::mencoder;
                          .':fps='.$episode->{'finfo'}{'fps'}
                          ;
         }
-    # Add any additional settings from the child module.
-    # NOTE: this comes before the standard filters below, because
-    # mencoder applies filters in reverse, and we want things like "scale" to
-    # run last.
-        $mencoder .= ' '.$self->{'mencoder_xtra'};
-    # Filters (remember, mencoder reads these in reverse order (so deint should be last if used)
-    # Normally you would do -vf filter1=<val>,filter2=<val>,lavcdeint...
-        if ($self->{'noise_reduction'}) {
-            $mencoder .= " -vf denoise3d";
-        }
-        if ($self->{'deinterlace'}) {
-            $mencoder .= " -vf lavcdeint";
-        }
     # Crop?
         if ($self->{'crop'}) {
             my $t = sprintf('%.0f', ($self->val('crop_top')    / 100) * $episode->{'finfo'}{'height'});
@@ -138,6 +125,15 @@ package export::mencoder;
             my $h = $episode->{'finfo'}{'height'} - $t - $b;
             $mencoder .= " -vf crop=$w:$h:$l:$t " if ($t || $r || $b || $l);
         }
+    # Filters
+        if ($self->{'deinterlace'}) {
+            $mencoder .= " -vf lavcdeint";
+        }
+        if ($self->{'noise_reduction'}) {
+            $mencoder .= " -vf denoise3d";
+        }
+    # Add any additional settings from the child module.
+        $mencoder .= ' '.$self->{'mencoder_xtra'};
     # Output directory set to null means the first pass of a multipass
         if (!$self->{'path'} || $self->{'path'} =~ /^\/dev\/null\b/) {
             $mencoder .= ' -o /dev/null';
