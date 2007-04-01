@@ -14,6 +14,7 @@ package export::NUV_SQL;
     use File::Basename;
     use DBI;
     use Term::ANSIColor;
+    use MythTV;
 
 # Load the myth and nuv utilities, and make sure we're connected to the database
     use nuv_export::shared_utils;
@@ -108,7 +109,7 @@ package export::NUV_SQL;
         print DATA "USE mythconverg;\n\n";
         foreach $table ('recorded', 'oldrecorded', 'recordedmarkup', 'recordedseek') {
             $q = "SELECT * FROM $table WHERE chanid=? AND starttime=FROM_UNIXTIME(?)";
-            $sh = $Myth->{'dbh'}->prepare($q);
+            $sh = $Main::Myth->{'dbh'}->prepare($q);
             $sh->execute($episode->{'chanid'}, $episode->{'recstartts'})
                 or die "Count not execute ($q):  $!\n\n";
             my $count = 0;
@@ -134,49 +135,36 @@ package export::NUV_SQL;
         }
     # Done saving the database info
         close DATA;
-    # Rename/move the file
-        if ($self->{'delete'}) {
-            print "\nMoving $episode->{'local_path'} to $self->{'export_path'}/$nuv_file\n";
-            move($episode->{'local_path'}, "$self->{'export_path'}/$nuv_file")
-                or die "Couldn't move specified .nuv file:  $!\n\n";
-        #
-        # @todo: Call the backend to delete the recording, rather than doing it
-        # manually, since this table list is no longer ANYWHERE near complete.
-        #
-        # Remove the entry from recordedmarkup
-            $q = 'DELETE FROM recordedmarkup WHERE chanid=? AND starttime=FROM_UNIXTIME(?)';
-            $sh = $Myth->{'dbh'}->prepare($q);
-            $sh->execute($episode->{'chanid'}, $episode->{'starttime'})
-                or die "Could not execute ($q):  $!\n\n";
-        # Remove this entry from the database
-            $q = 'DELETE FROM recorded WHERE chanid=? AND starttime=FROM_UNIXTIME(?)';
-            $sh = $Myth->{'dbh'}->prepare($q);
-            $sh->execute($episode->{'chanid'}, $episode->{'starttime'})
-                or die "Could not execute ($q):  $!\n\n";
-        # Tell the other nodes that changes have been made
-            $q = 'UPDATE settings SET data="yes" WHERE value="RecordChanged"';
-            $sh = $Myth->{'dbh'}->prepare($q);
-            $sh->execute()
-                or die "Could not execute ($q):  $!\n\n";
+    # Copy/link the file into place
+        print "\nCopying $episode->{'local_path'} to $self->{'export_path'}/$nuv_file\n";
+    # Use hard links when copying within a filesystem
+        if ((stat($episode->{'local_path'}))[0] == (stat($self->{'path'}))[0]) {
+            link($episode->{'local_path'}, "$self->{'export_path'}/$nuv_file")
+                or die "Couldn't hard link specified .nuv file:  $!\n\n";
         }
-    # Copy the file
         else {
-            print "\nCopying $episode->{'local_path'} to $self->{'export_path'}/$nuv_file\n";
-        # use hard links when copying within a filesystem
-            if ((stat($episode->{'local_path'}))[0] == (stat($self->{'path'}))[0]) {
-                link($episode->{'local_path'}, "$self->{'export_path'}/$nuv_file")
-                    or die "Couldn't hard link specified .nuv file:  $!\n\n";
-            }
-            else {
-                copy($episode->{'local_path'}, "$self->{'export_path'}/$nuv_file")
-                    or die "Couldn't copy specified .nuv file:  $!\n\n";
-            }
+            copy($episode->{'local_path'}, "$self->{'export_path'}/$nuv_file")
+                or die "Couldn't copy specified .nuv file:  $!\n\n";
+        }
+    # Delete the record?
+        if ($self->{'delete'}) {
+            print "Deleting from MythTV\n";
+            $Main::Myth->backend_command(['FORCE_DELETE_RECORDING', $episode->to_string()], '0');
         }
     }
 
     sub cleanup {
         # Nothing to do here
     }
+
+# Escape a string for MySQL
+    sub mysql_escape {
+        $string = shift;
+        return 'NULL' unless (defined $string);
+        $string =~ s/'/\\'/sg;
+        return "'$string'";
+    }
+
 
 1;  #return true
 

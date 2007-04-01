@@ -36,6 +36,10 @@
     use MythTV;
     our $Myth = new MythTV();
 
+# Assign this globally so that other modules can access it
+    $Main::Myth = $Myth;
+    1 if ($Main::Myth);     # Avoid a stupid "used only once" warning
+
 # Load the myth and nuv utilities, and connect to the database
     use Date::Manip;
     use nuv_export::shared_utils;
@@ -159,7 +163,7 @@
                                       'channum:     '.$episode->{'channum'},
                                       'callsign:    '.$episode->{'callsign'},
                                       'channame:    '.$episode->{'channame'},
-                                      'airdate:     '.UnixDate("epoch $episode->{'airdate'}", '%O'),
+                                      'airdate:     '.(UnixDate('epoch '.$episode->{'airdate'}, '%O') or $episode->{'airdate'}),
                                       'stars:       '.(4 * $episode->{'stars'}),
                                       'recgroup:    '.$episode->{'recgroup'},
                                       'seriesid:    '.$episode->{'seriesid'},
