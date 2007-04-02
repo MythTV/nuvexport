@@ -247,10 +247,13 @@ package export::generic;
     # No height given -- use auto?
         if (!$self->val('width') || $self->val('width') =~ /^\s*\D/) {
             $self->{'width'} = $episodes[0]->{'finfo'}{'width'};
+            print 'Default resolution based on ',
+                  ($self->val('force_aspect') ? 'forced ' : ''),
+                  $episodes[0]->{'finfo'}{'aspect'}, " aspect ratio.\n";
         }
-        print 'Default resolution based on ',
-              ($self->val('force_aspect') ? 'forced ' : ''),
-              $episodes[0]->{'finfo'}{'aspect'}, " aspect ratio.\n";
+        else {
+            print "Default resolution based on requested dimensions.\n";
+        }
     # Ask the user what resolution he/she wants
         while (1) {
             my $w = query_text('Width?',

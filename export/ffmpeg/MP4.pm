@@ -28,7 +28,8 @@ package export::ffmpeg::MP4;
     add_arg('v_bitrate|v=i',    'Video bitrate');
     add_arg('multipass!',       'Enable two-pass encoding.');
     add_arg('mp4_codec=s',      'Video codec to use for MP4/iPod video (mpeg4 or h264).');
-    add_arg('mp4_fps=s',        'Framerate to use:  auto, 25, 23.97, 29.97');
+    add_arg('mp4_fps=s',        'Framerate to use:  auto, 25, 23.97, 29.97.');
+    add_arg('ipod!',            'Produce ipod-compatible output.');
 
     sub new {
         my $class = shift;
@@ -107,6 +108,10 @@ package export::ffmpeg::MP4;
                                           $self->val('a_bitrate'));
     # Video options
         if (!$is_cli) {
+        # iPod compatibility mode?
+            $self->{'ipod'} = query_text('Enable iPod compatibility?',
+                                         'yesno',
+                                         $self->val('ipod'));
         # Video codec
             if ($self->{'ffmpeg_vers'} eq 'svn') {
                 while (1) {
@@ -165,11 +170,19 @@ package export::ffmpeg::MP4;
         if ($self->{'mp4_codec'} eq 'h264' && $self->{'ffmpeg_vers'} ne 'svn') {
             die "h.264 mp4/ipod encoding requires the svn version of ffmpeg.\n";
         }
-    # Query the resolution
-        $self->query_resolution();
-    # Warn about ipod resolution
-        if ($self->{'height'} > 480 || $self->{'width'} > 640) {
-            print "WARNING:  Video larger than 640x480 will not play on an iPod.\n";
+    # Loop, in case we need to verify ipod compatibility
+        while (1) {
+        # Query the resolution
+            $self->query_resolution();
+        # Warn about ipod resolution
+            if ($self->val('ipod') && ($self->{'height'} > 480 || $self->{'width'} > 640)) {
+                my $note = "WARNING:  Video larger than 640x480 will not play on an iPod.\n";
+                die $note if ($is_cli);
+                print $note;
+                next;
+            }
+        # Done looping
+            last;
         }
     }
 
@@ -270,7 +283,7 @@ package export::ffmpeg::MP4;
         }
     # Single/final pass options
         if ($self->{'mp4_codec'} eq 'h264') {
-            $ffmpeg_xtra .= ' -refs 2'
+            $ffmpeg_xtra .= ' -refs '.($self->var('ipod') ? 2 : 7)
                            .' -subq 7'
                            .' -partitions parti4x4+parti8x8+partp4x4+partp8x8+partb8x8'
                            .' -flags2 +bpyramid+wpred+mixed_refs+8x8dct+brdo'

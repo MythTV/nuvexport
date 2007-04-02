@@ -6,10 +6,10 @@
 #    nuvexport will look first, if you wish to create settings local to a
 #    specific user.
 #
-#  support for nuvexportrc is still new, so expect that more default options
-#    will be added as time goes on (so you'll know what you can edit).  In the
-#    meantime, you can poke around in the code for add_arg() calls to see which
-#    options are available.
+#  I try to use this file to document all of the commandline options supported
+#    by nuvexport, but it is quite likely that a few slip through here and there
+#    unnoticed.  Feel free to poke around in the code for add_arg() calls to see
+#    all of the available options.
 #
 
 #
@@ -102,10 +102,19 @@
 #   crop_left   = 2
 
 #
+#  You can also override the output aspect ratio.  This is useful in combination
+#  with crop_top=12.5 and crop_bottom=12.5 to remove the black bars from the
+#  top/bottom of recordings broadcast in fake widescreen.
+#
+#   out_aspect  = 16:9
+#
+
+
+#
 #  Export a matching .txt file, which mythvideo can use to import information
 #  about your exports, since it likely can't look them up in imdb.
 #
-    save_info = yes
+#   save_info = yes
 
 </nuvexport>
 
@@ -119,7 +128,7 @@
 #
 # Default to export to the current directory
 #
-    path = /home/xris/Video
+    path = .
 
 #
 # Use the cutlist (not to be confused with the commercial flag list) when
@@ -144,8 +153,9 @@
 
 #
 # Disabling noise reduction can speed up your exports dramatically, but at the
-#    expense of some quality.  You can also access this on the commandline via
-#    the --denoise (or --nodenoise) flag.
+#    expense of some quality.  For your convenience, this is also aliased on
+#    the commandline as --denoise (or --nodenoise), as well as
+#    --noise_reduction.
 #
     noise_reduction = no
 
@@ -224,6 +234,8 @@
 <mencoder>
 </mencoder>
 
+################################################################################
+
 #
 #  You can also create settings for generic export module names.  These will
 #    only be overridden by full module names.
@@ -245,17 +257,56 @@
 </XviD>
 
 #
-#  Default mp3 bitrate is 128
+#  The mp3 bitrate used by MythTV's software encoder is 128, so there is no
+#    real need to go any higher in exports.  You can, of course, turn this up if
+#    you get your recordings from other sources.
 #
 <MP3>
     bitrate = 128
 </MP3>
+
+################################################################################
 
 #
 #  If you want to provide settings for a very specific export module, you can
 #    use its full name, and it will override any more generic settings.
 #
 
+#
+# The MP4 encoder for ffmpeg has a few options unique to itself
+#
+<ffmpeg::MP4>
+
+#
+#  Codec to use (mpeg4 or h264).  Please note that h264 support requires the
+#    SVN version of ffmpeg (not CVS!).  In fact, even the mpeg4 codec works
+#    better with the SVN version.
+#
+#    Note:  The h.264 files exported by nuvexport seem to play fine on ipods,
+#    but lack the atom necessary to be recognized by iTunes, so you will have to
+#    find other means to get the exports onto your ipod (gtkpod works great).
+#
+    mp4_codec = h264
+
+#
+#  Framerate to use:  auto, 25, 23.97, 29.97.  PAL will always be 25 fps, and
+#    auto will set 29.97 for everything over 320x288 and 23.97 for the rest.
+#
+    mp4_fps = auto
+
+#
+#  Enable ipod compatibility mode.  Aside from forcing a max resolution of
+#    640x480, this basically just sets motion detection reference frames (-refs)
+#    to 2 instead of 7 (the ipod can only handle 2), and thus a small drop in
+#    motion detection quality.
+#
+    ipod = yes
+
+</ffmpeg::MP4>
+
+#
+# As does the PSP exporter
+#
 <ffmpeg::PSP>
 
 # PSP framerate (high=29.97, low=14.985)
@@ -272,113 +323,52 @@
 
 </ffmpeg::PSP>
 
-<ffmpeg::MP4>
+#
+# You can also add flags to the one and only mencoder option
+#
+<mencoder::XviD>
 
-# Codec to use (xvid or h264).  Please note that h264 support is experimental.
-# I have not yet been able to export a file using h264 that actuall works,
-# despite the fact that I've tried my best to copy the ffmpeg parameters from
-# iSquint, which does work.
-    mp4_codec = h264
+    multipass = no
 
-    noise_reduction = no
-    deinterlace     = yes
-    multipass       = yes
-    v_bitrate       = 768
-    a_bitrate       = 128
+</mencoder::XviD>
 
-    width        = 528
-    height       = 480
-
-# Framerate to use:  auto, 25, 23.97, 29.97.  PAL will always be 25 fps, and
-# auto will set 29.97 for everything over 320x288 and 23.97 for the rest.
-    mp4_fps = auto
-
-</ffmpeg::MP4>
+################################################################################
 
 #
-# You can also make specific profiles called with the --profile parameter that
-# will override other config options (but not commandline arguments).
+#  You can also make specific profiles called with the --profile parameter that
+#    will override other config options (but not commandline arguments).
 #
-# For example, you could make a profile that would encode your favorite show
-# with your favorite settings.
+#    For example, you could make a profile that would encode your favorite show
+#    with your favorite settings.
 #
-<profile::bourdain>
+<profile::sample>
 
-    title       = bourdain
+    title       = test
+
+    export_prog = transcode
+    mode        = xvid
+    confirm     = true
+
+</profile::sample>
+
+#
+#  Or crop the black bars off of the top/bottom of fake widescreen shows.
+#
+<profile::samplewide>
+
+    title       = test
 
     export_prog = ffmpeg
     mode        = mp4
+
+    out_aspect  = 16:9
 
     crop_pct    = 0
-    crop_right  = 1.5
-    crop_left   = 1.5
+    crop_top    = 12.5
+    crop_bottom = 12.5
 
     width        = 528
-    height       = 480
+    height       = 360
 
-</profile::bourdain>
+</profile::samplewide>
 
-<profile::follow>
-
-    title       = follow that
-
-    export_prog = ffmpeg
-    mode        = mp4
-
-    crop_pct = 0
-
-    width  = 352
-    height = 480
-
-    # The episodes all say "follow that" at the beginning
-    filename=%s
-
-</profile::follow>
-
-<profile::goodeats>
-
-    title       = good eats
-
-    export_prog = ffmpeg
-    mode        = mp4
-
-    crop_pct    = 0
-    crop_top    = 1
-    crop_right  = 1
-    crop_left   = 1
-
-    width        = 528
-    height       = 480
-
-</profile::goodeats>
-
-<profile::iron>
-
-    title       = iron chef
-
-    export_prog = ffmpeg
-    mode        = mp4
-
-    crop_pct    = 0
-    crop_top    = 1
-    crop_left   = 1
-
-    width        = 528
-    height       = 480
-
-</profile::iron>
-
-<profile::greg>
-
-    title       = greg the
-
-    export_prog = ffmpeg
-    mode        = mp4
-
-    crop_pct    = 0
-    crop_left   = 1
-
-    width        = 528
-    height       = 480
-
-</profile::greg>
