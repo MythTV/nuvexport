@@ -283,7 +283,7 @@ package export::ffmpeg::MP4;
         }
     # Single/final pass options
         if ($self->{'mp4_codec'} eq 'h264') {
-            $ffmpeg_xtra .= ' -refs '.($self->var('ipod') ? 2 : 7)
+            $ffmpeg_xtra .= ' -refs '.($self->val('ipod') ? 2 : 7)
                            .' -subq 7'
                            .' -partitions parti4x4+parti8x8+partp4x4+partp8x8+partb8x8'
                            .' -flags2 +bpyramid+wpred+mixed_refs+8x8dct+brdo'
