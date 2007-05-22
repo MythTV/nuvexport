@@ -384,7 +384,7 @@ package export::generic;
                 if ($pid == $mythtrans_pid) {
                     print "\nmythtranscode finished.\n" unless ($DEBUG);
                     my $warnings = '';
-                    while (has_data($mythtrans_h) && $l = <$mythtrans_h>) {
+                    while (has_data($mythtrans_h) and $l = <$mythtrans_h>) {
                         $warnings .= $l;
                     }
                     die "\n\nmythtranscode had died early:\n\n$warnings\n";
