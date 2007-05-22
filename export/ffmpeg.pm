@@ -344,7 +344,7 @@ package export::ffmpeg;
         mkdir("/tmp/fifodir_$$/", 0755) or die "Can't create /tmp/fifodir_$$/:  $!\n\n";
         ($mythtrans_pid, $mythtrans_h) = fork_command("$mythtranscode 2>&1");
         $children{$mythtrans_pid} = 'mythtranscode' if ($mythtrans_pid);
-        fifos_wait("/tmp/fifodir_$$/");
+        fifos_wait("/tmp/fifodir_$$/", $mythtrans_pid, $mythtrans_h);
         push @tmpfiles, "/tmp/fifodir_$$", "/tmp/fifodir_$$/audout", "/tmp/fifodir_$$/vidout";
 
     # For multipass encodes, we don't need the audio on the first pass
@@ -436,6 +436,11 @@ package export::ffmpeg;
                     if ($episode->{'total_frames'} < $total) {
                         $episode->{'total_frames'} = $total;
                     }
+                }
+            # Unrecognized options
+                elsif ($l =~ /^Couldn't\sfind\srecording/m) {
+                    $warnings .= $l;
+                    die "\n\nmythtranscode had critical errors:\n\n$warnings";
                 }
             }
         # Has the deathtimer been started?  Stick around for awhile, but not too long

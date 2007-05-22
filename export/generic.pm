@@ -371,12 +371,24 @@ package export::generic;
 
     sub fifos_wait {
     # Sleep a bit to let mythtranscode start up
-        my $fifodir = shift;
+        my $fifodir       = shift;
+        my $mythtrans_pid = shift;
+        my $mythtrans_h   = shift;
         my $overload = 0;
         if (!$DEBUG) {
             while (++$overload < 30 && !(-e "$fifodir/audout" && -e "$fifodir/vidout" )) {
                 sleep 1;
                 print "Waiting for mythtranscode to set up the fifos.\n";
+            # Check to see if mythtranscode died
+                my $pid = waitpid(-1, &WNOHANG);
+                if ($pid == $mythtrans_pid) {
+                    print "\nmythtranscode finished.\n" unless ($DEBUG);
+                    my $warnings = '';
+                    while (has_data($mythtrans_h) && $l = <$mythtrans_h>) {
+                        $warnings .= $l;
+                    }
+                    die "\n\nmythtranscode had died early:\n\n$warnings\n";
+                }
             }
             unless (-e "$fifodir/audout" && -e "$fifodir/vidout") {
                 die "Waited too long for mythtranscode to create its fifos.  Please try again.\n\n";
