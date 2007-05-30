@@ -381,7 +381,7 @@ package export::generic;
                 print "Waiting for mythtranscode to set up the fifos.\n";
             # Check to see if mythtranscode died
                 my $pid = waitpid(-1, &WNOHANG);
-                if ($pid == $mythtrans_pid) {
+                if ($pid && $pid == $mythtrans_pid) {
                     print "\nmythtranscode finished.\n" unless ($DEBUG);
                     my $warnings = '';
                     while (has_data($mythtrans_h) and $l = <$mythtrans_h>) {
