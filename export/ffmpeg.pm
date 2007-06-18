@@ -61,6 +61,8 @@ package export::ffmpeg;
             else {
                 push @{$self->{'errors'}}, 'Unrecognizeable yuvdenoise version string.';
                 $self->{'noise_reduction'} = 0;
+                $self->{'denoise_vmaj'}    = 0;
+                $self->{'denoise_vmin'}    = 0;
             }
         # New yuvdenoise can't deinterlace
             if ($self->{'denoise_vmaj'} > 1.6 || ($self->{'denoise_vmaj'} == 1.6 && $self->{'denoise_vmin'} > 2)) {
