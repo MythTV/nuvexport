@@ -154,7 +154,7 @@ package export::ffmpeg::DivX;
                                    . ' -part'
                                    . ' -vtag divx'
                                    . ' -acodec mp3'
-                                   . ' -ab ' . $self->{'a_bitrate'}
+                                   .$self->param('ab', $self->{'a_bitrate'})
                                    . " -pass 2 -passlogfile '/tmp/divx.$$.log'"
                                    . ' -f avi';
         }
@@ -174,7 +174,7 @@ package export::ffmpeg::DivX;
                                    . ' -part'
                                    . ' -vtag divx'
                                    . ' -acodec mp3'
-                                   . ' -ab ' . $self->{'a_bitrate'}
+                                   .$self->param('ab', $self->{'a_bitrate'})
                                    . ' -f avi';
         }
     # Execute the (final pass) encode

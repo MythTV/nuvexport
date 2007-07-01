@@ -77,7 +77,8 @@ package export::ffmpeg::DVCD;
     # Build the transcode string
         $self->{'ffmpeg_xtra'}  = $self->param('bit_rate', 1150)
                                  ." -vcodec mpeg1video"
-                                 ." -ab 224 -ar 48000 -acodec mp2"
+                                 .$self->param('ab', 224)
+                                 ." -ar 48000 -acodec mp2"
                                  ." -f vcd";
     # Execute the parent method
         $self->SUPER::export($episode, ".mpg");

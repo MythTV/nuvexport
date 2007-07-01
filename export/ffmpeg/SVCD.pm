@@ -143,7 +143,7 @@ package export::ffmpeg::SVCD;
         $self->{'ffmpeg_xtra'} = $self->param('bit_rate', $self->{'v_bitrate'})
                                 .' -vcodec mpeg2video'
                                 .' -qmin ' . $self->{'quantisation'}
-                                .' -ab ' . $self->{'a_bitrate'}
+                                .$self->param('ab', $self->{'a_bitrate'})
                                 ." -ar 44100 -acodec mp2"
                                 ." -f svcd";
     # Execute the parent method

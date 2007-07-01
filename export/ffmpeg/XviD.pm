@@ -179,7 +179,7 @@ package export::ffmpeg::XviD;
         }
     # Don't forget the audio, etc.
         $self->{'ffmpeg_xtra'} .= ' -acodec mp3 -async 1'
-                                 .' -ab '.$self->{'a_bitrate'}
+                                 .$self->param('ab', $self->{'a_bitrate'})
                                  .' -f avi';
     # Execute the (final pass) encode
         $self->SUPER::export($episode, '.avi');

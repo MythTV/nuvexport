@@ -299,7 +299,7 @@ package export::ffmpeg::MP4;
     # Don't forget the audio, etc.
         $self->{'ffmpeg_xtra'} = $ffmpeg_xtra
                                 .' -acodec aac -ar 48000 -async 1'
-                                .' -ab '.$self->{'a_bitrate'};
+                                .$self->param('ab', $self->{'a_bitrate'});
     # Execute the (final pass) encode
         $self->SUPER::export($episode, '.mp4');
     }

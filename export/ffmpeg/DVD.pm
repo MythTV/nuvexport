@@ -140,7 +140,7 @@ package export::ffmpeg::DVD;
         $self->{'ffmpeg_xtra'} = $self->param('bit_rate', $self->{'v_bitrate'})
                                . ' -vcodec mpeg2video'
                                . ' -qmin ' . $self->{'quantisation'}
-                               . ' -ab ' . $self->{'a_bitrate'}
+                               .$self->param('ab', $self->{'a_bitrate'})
                                . " -ar 48000 -acodec mp2 -f dvd";
     # Execute the parent method
         $self->SUPER::export($episode, ".mpg");

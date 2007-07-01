@@ -146,7 +146,7 @@ package export::ffmpeg::ASF;
                                    . ' -bufsize 65535'
 #                                   . ' -lumi_mask 0.05 -dark_mask 0.02 -scplx_mask 0.7'
                                    . ' -acodec mp3'
-                                   . ' -ab ' . $self->{'a_bitrate'}
+                                   .$self->param('ab', $self->{'a_bitrate'})
                                    . " -pass 2 -passlogfile '/tmp/asf.$$.log'"
                                    . ' -f asf';
         }
@@ -163,7 +163,7 @@ package export::ffmpeg::ASF;
 #                                   . ' -lumi_mask 0.05 -dark_mask 0.02'
 #                                   . ' -scplx_mask 0.7'
                                    . ' -acodec mp3'
-                                   . ' -ab ' . $self->{'a_bitrate'}
+                                   .$self->param('ab', $self->{'a_bitrate'})
                                    . ' -f asf';
         }
     # Execute the (final pass) encode
