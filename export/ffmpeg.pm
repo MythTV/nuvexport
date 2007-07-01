@@ -98,6 +98,9 @@ package export::ffmpeg;
         if ($data =~ /bit_rate_tolerance/) {
             $self->{'ffmpeg_param_vers'} = 0;
         }
+        elsif ($data =~ /-ab\b.+set\s+bitrate\s+\(in\s+bits\/s\)/) {
+            $self->{'ffmpeg_param_vers'} = 2;
+        }
         else {
             $self->{'ffmpeg_param_vers'} = 1;
         }
@@ -137,7 +140,10 @@ package export::ffmpeg;
         my $param = lc(shift);
         my $value = shift;
     # Which version?
-        if ($self->{'ffmpeg_param_vers'} == 1) {
+        if ($self->{'ffmpeg_param_vers'} >= 2) {
+            return param_pair('ab',             $value * 1024) if ($param eq 'ab');
+        }
+        if ($self->{'ffmpeg_param_vers'} >= 1) {
             return param_pair('ac',             $value)        if ($param eq 'channels');
             return param_pair('ar',             $value)        if ($param eq 'sample_rate');
             return param_pair('b',              $value * 1024) if ($param eq 'bit_rate');
