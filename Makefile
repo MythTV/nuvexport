@@ -31,7 +31,6 @@ MODULE_SUBDIRS    = transcode \
 		    ffmpeg    \
 		    mencoder
 MYTHTV_MODULES	  = mythtv/nuvinfo.pm \
-		    mythtv/db.pm      \
 		    mythtv/recordings.pm
 NUVEXPORT_MODULES = nuv_export/help.pm         \
 		    nuv_export/shared_utils.pm \
