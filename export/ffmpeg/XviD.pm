@@ -143,8 +143,10 @@ package export::ffmpeg::XviD;
         my $ffmpeg_xtra  = ' -vcodec xvid'
                           .$self->param('bit_rate', $self->{'v_bitrate'})
                           .($self->{'vbr'}
-                            ? ' -bt 32 -minrate 32 -maxrate '.(2*$self->{'v_bitrate'})
-                             .' -bufsize 65535'
+                            ? $self->param('rc_min_rate', 32)
+                             . $self->param('rc_max_rate', (2 * $self->{'v_bitrate'}))
+                             . $self->param('bit_rate_tolerance', 32)
+                             . ' -bufsize 65535'
                             : '')
                           .' -flags +4mv+trell+loop'
                           .' -aic 1'

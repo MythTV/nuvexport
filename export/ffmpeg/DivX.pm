@@ -132,7 +132,9 @@ package export::ffmpeg::DivX;
             print "First pass...\n";
             $self->{'ffmpeg_xtra'} = ' -vcodec mpeg4'
                                    . $self->param('bit_rate', $self->{'v_bitrate'})
-                                   . ' -minrate 32 -maxrate '.(2*$self->{'v_bitrate'}).' -bt 32'
+                                   . $self->param('rc_min_rate', 32)
+                                   . $self->param('rc_max_rate', (2 * $self->{'v_bitrate'}))
+                                   . $self->param('bit_rate_tolerance', 32)
                                    . ' -bufsize 65535'
                                    . ' -lumi_mask 0.05 -dark_mask 0.02 -scplx_mask 0.5'
                                    . ' -mv4'
@@ -146,8 +148,10 @@ package export::ffmpeg::DivX;
         # Second pass
             print "Final pass...\n";
             $self->{'ffmpeg_xtra'} = ' -vcodec mpeg4'
-                                   . ' -b ' . $self->{'v_bitrate'}
-                                   . ' -minrate 32 -maxrate '.(2*$self->{'v_bitrate'}).' -bt 32'
+                                   . $self->param('bit_rate', $self->{'v_bitrate'})
+                                   . $self->param('rc_min_rate', 32)
+                                   . $self->param('rc_max_rate', (2 * $self->{'v_bitrate'}))
+                                   . $self->param('bit_rate_tolerance', 32)
                                    . ' -bufsize 65535'
                                    . ' -lumi_mask 0.05 -dark_mask 0.02 -scplx_mask 0.5'
                                    . ' -mv4'
@@ -161,13 +165,14 @@ package export::ffmpeg::DivX;
     # Single Pass
         else {
             $self->{'ffmpeg_xtra'} = ' -vcodec mpeg4'
-                                   . ' -b ' . $self->{'v_bitrate'}
+                                   . $self->param('bit_rate', $self->{'v_bitrate'})
                                    . ($self->{'vbr'}
                                        ? " -qmin $self->{'quantisation'}"
-                                       . ' -qmax 31 -minrate 32'
-                                       . ' -maxrate '.(2*$self->{'v_bitrate'})
-                                       . ' -bt 32'
-                                       . ' -bufsize 65535'
+                                        . ' -qmax 31'
+                                        . $self->param('rc_min_rate', 32)
+                                        . $self->param('rc_max_rate', (2 * $self->{'v_bitrate'}))
+                                        . $self->param('bit_rate_tolerance', 32)
+                                        . ' -bufsize 65535'
                                        : '')
                                    . ' -lumi_mask 0.05 -dark_mask 0.02 -scplx_mask 0.5'
                                    . ' -mv4'
