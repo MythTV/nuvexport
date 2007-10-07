@@ -50,7 +50,16 @@ EOF
         next unless ($key && defined $show->{$key});
         next if ($key eq '_mythtv' || $key eq 'channel');
         print ' ' x (23 - length($key)) if (length($key) < 23);
-        print "$key:  $show->{$key}\n";
+        if ($key eq 'credits') {
+            print "$key: ";
+            foreach $role (sort keys %{$show->{$key}}) {
+                print " " . ucfirst($role) . " (" . join(',', @{$show->{$key}{$role}}) . ")";
+            }
+            print "\n";
+        }
+        else {
+            print "$key:  $show->{$key}\n";
+        }
     }
     print "\ndone\n\n";
 
