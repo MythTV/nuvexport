@@ -33,7 +33,9 @@ package mythtv::recordings;
     $|++;
 
 # Load the following extra parameters from the commandline
-    add_arg('date:s', 'Date format used for human-readable dates.');
+    add_arg('date:s',       'Date format used for human-readable dates.');
+    add_arg('show_deleted', 'Show recordings in the Deleted recgroup.');
+    add_arg('show_livetv',  'Show recordings in the LiveTV recgroup.');
 
 #
 #   Load all known recordings
@@ -71,6 +73,10 @@ package mythtv::recordings;
             }
         # Skip files that aren't local (until file info is stored in the db)
             next unless ($file->{'local_path'} && -e $file->{'local_path'});
+        # Skip files in 'Deleted' recgroup
+            next if ($file->{'recgroup'} eq 'Deleted' && !arg('show_deleted'));
+        # Skip files in 'Deleted' recgroup
+            next if ($file->{'recgroup'} eq 'LiveTV' && !arg('show_livetv'));
         # Defaults
             $file->{'title'}       = 'Untitled'       unless ($file->{'title'} =~ /\S/);
             $file->{'subtitle'}    = 'Untitled'       unless ($file->{'subtitle'} =~ /\S/);

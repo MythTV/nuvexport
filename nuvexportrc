@@ -179,6 +179,13 @@
 #
 #   save_info = yes
 
+#
+#  Include recordings from some special recgroups that wouldn't normally be
+#  available for export.
+#
+#   show_deleted = yes
+#   show_livetv  = yes
+
 </nuvexport>
 
 #
