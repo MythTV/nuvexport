@@ -52,8 +52,16 @@ EOF
         print ' ' x (23 - length($key)) if (length($key) < 23);
         if ($key eq 'credits') {
             print "$key: ";
+            my $i = 0;
             foreach $role (sort keys %{$show->{$key}}) {
-                print " " . ucfirst($role) . " (" . join(',', @{$show->{$key}{$role}}) . ")";
+                $i++;
+                if ($i > 1) {
+                    print ';';
+                }
+                print ' ', ucfirst($role),
+                      ' (',
+                      join(', ', @{$show->{$key}{$role}}),
+                      ')';
             }
             print "\n";
         }
