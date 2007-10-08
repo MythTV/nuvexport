@@ -86,7 +86,7 @@ package nuv_export::ui;
             # Make sure the requested show exists
                 foreach my $show (sort keys %Shows) {
                     foreach my $episode (@{$Shows{$show}}) {
-                        next unless ($chanid == $episode->{'chanid'} && $starttime == $episode->{'starttime'});
+                        next unless ($chanid == $episode->{'chanid'} && $starttime == $episode->{'recstartts'});
                         load_finfo($episode);
                         push @matches, $episode;
                         last;
