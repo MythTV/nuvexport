@@ -329,9 +329,11 @@ package export::transcode;
         my ($frames, $fps);
         $frames = 0;
         $fps    = 0.0;
-        my $total_frames = $episode->{'last_frame'} > 0
-                            ? $episode->{'last_frame'} - $episode->{'cutlist_frames'}
-                            : 0;
+        if (!$episode->{'total_frames'} || $episode->{'total_frames'} < 1) {
+            $episode->{'total_frames'} = $episode->{'last_frame'} > 0
+                                         ? $episode->{'last_frame'} - $episode->{'cutlist_frames'}
+                                         : 0;
+        }
     # Keep track of any warnings
         my $warnings    = '';
         my $death_timer = 0;
@@ -340,14 +342,14 @@ package export::transcode;
         while ((keys %children) > 0) {
             my ($l, $pct);
         # Show progress
-            if ($frames && $total_frames) {
-                $pct = sprintf('%.2f', 100 * $frames / $total_frames);
+            if ($frames && $episode->{'total_frames'}) {
+                $pct = sprintf('%.2f', 100 * $frames / $episode->{'total_frames'});
             }
             else {
                 $pct = '~';
             }
-            print "\rprocessed:  $frames of $total_frames frames at $fps fps ($pct\%, eta: ",
-                  $self->build_eta($frames, $total_frames, $fps),
+            print "\rprocessed:  $frames of $episode->{'total_frames'} frames at $fps fps ($pct\%, eta: ",
+                  $self->build_eta($frames, $episode->{'total_frames'}, $fps),
                   ')  ';
         # Read from the transcode handle
             while (has_data($trans_h) and $l = <$trans_h>) {
@@ -368,8 +370,16 @@ package export::transcode;
             if ($mythtranscode && $mythtrans_pid) {
                 while (has_data($mythtrans_h) and $l = <$mythtrans_h>) {
                     if ($l =~ /Processed:\s*(\d+)\s*of\s*(\d+)\s*frames\s*\((\d+)\s*seconds\)/) {
-                        #$frames       = int($1);
-                        $total_frames ||= $2 - $episode->{'cutlist_frames'};
+                    # Transcode behaves properly with audio streams, so we can
+                    # ignore this.
+                        #if ($self->{'audioonly'}) {
+                        #    $frames = int($1);
+                        #}
+                    # mythtranscode is going to be the most accurate total frame count.
+                        my $total = $2 - $episode->{'cutlist_frames'};
+                        if ($episode->{'total_frames'} < $total) {
+                            $episode->{'total_frames'} = $total;
+                        }
                     }
                 }
             }
