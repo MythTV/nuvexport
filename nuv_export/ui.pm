@@ -230,8 +230,8 @@ package nuv_export::ui;
             my $found = 0;
             my $aspect = "";
             foreach my $selected (@episodes) {
-                next unless ($selected->{'channel'} == $episode->{'channel'}
-                             && $selected->{'starttime'} == $episode->{'starttime'});
+                next unless ($selected->{'chanid'} == $episode->{'chanid'}
+                             && $selected->{'recstartts'} == $episode->{'recstartts'});
                 $found = 1;
                 last;
             }
