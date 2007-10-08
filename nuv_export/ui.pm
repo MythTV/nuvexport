@@ -61,9 +61,9 @@ package nuv_export::ui;
         # Filename specified on the command line -- extract the chanid and starttime
             if (arg('infile')) {
             # Try to pick out the chanid and starttime from the database
-                my $sh = $Myth->{'dbh'}->prepare('SELECT chanid, UNIX_TIMESTAMP(starttime)
-                                                    FROM recorded
-                                                   WHERE basename = ?');
+                my $sh = $Main::Myth->{'dbh'}->prepare('SELECT chanid, UNIX_TIMESTAMP(starttime)
+                                                          FROM recorded
+                                                         WHERE basename = ?');
                 if ($sh) {
                 # Look up the file, by basename
                     $rows = $sh->execute(basename(arg('infile')));
