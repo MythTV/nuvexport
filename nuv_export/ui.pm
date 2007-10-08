@@ -11,6 +11,7 @@
 package nuv_export::ui;
 
     use File::Path;
+    use File::Basename;
     use English;
 
 # Load the myth and nuv utilities, and make sure we're connected to the database
@@ -66,7 +67,7 @@ package nuv_export::ui;
                     my $infile = arg('infile');
                     $infile =~ s/^$video_dir\/*//;
                 # Look up the file
-                    $rows = $sh->execute($infile);
+                    $rows = $sh->execute(basename($infile));
                     if (defined $rows) {
                         ($chanid, $starttime) = $sh->fetchrow_array();
                     }
@@ -86,7 +87,7 @@ package nuv_export::ui;
             # Make sure the requested show exists
                 foreach my $show (sort keys %Shows) {
                     foreach my $episode (@{$Shows{$show}}) {
-                        next unless ($chanid == $episode->{'channel'} && $starttime == $episode->{'starttime'});
+                        next unless ($chanid == $episode->{'chanid'} && $starttime == $episode->{'starttime'});
                         load_finfo($episode);
                         push @matches, $episode;
                         last;
