@@ -53,7 +53,7 @@ package mythtv::recordings;
         my %rows = $Myth->backend_rows('QUERY_RECORDINGS Delete');
 
     # Nothing?!
-        die "No valid recordings found!\n\n" unless (@{$rows{'rows'}});
+        die "No valid recordings found!\n\n" unless (defined $rows{'rows'} && @{$rows{'rows'}});
 
         $num_shows = $count = 0;
         foreach $file (@{$rows{'rows'}}) {
