@@ -56,9 +56,9 @@ package export::ffmpeg::XviD;
         $self->init_ffmpeg();
 
     # Can we even encode xvid?
-        if (!$self->can_encode('xvid')) {
+        if (!$self->can_encode('xvid') && !$self->can_encode('libxvid')) {
             push @{$self->{'errors'}}, "Your ffmpeg installation doesn't support encoding to xvid.\n"
-                                      ."  (It must be compiled with the --enable-xvid option)";
+                                      ."  (It must be compiled with the --enable-libxvid option)";
         }
         if (!$self->can_encode('mp3')) {
             push @{$self->{'errors'}}, "Your ffmpeg installation doesn't support encoding to mp3 audio.";
@@ -139,8 +139,10 @@ package export::ffmpeg::XviD;
             $safe_title .= ' - '.$episode->{'subtitle'};
         }
         my $safe_title = shell_escape($safe_title);
+    # Codec name changes between ffmpeg versions
+        my $codec = $self->can_encode('libxvid') ? 'libxvid' : 'xvid';
     # Build the common ffmpeg string
-        my $ffmpeg_xtra  = ' -vcodec xvid'
+        my $ffmpeg_xtra  = ' -vcodec '.$codec
                           .$self->param('bit_rate', $self->{'v_bitrate'})
                           .($self->{'vbr'}
                             ? $self->param('rc_min_rate', 32)

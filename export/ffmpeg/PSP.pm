@@ -44,7 +44,7 @@ package export::ffmpeg::PSP;
         if (!$self->can_encode('psp')) {
             push @{$self->{'errors'}}, "Your ffmpeg installation doesn't support encoding to psp video.";
         }
-        if (!$self->can_encode('aac')) {
+        if (!$self->can_encode('aac') || !$self->can_encode('libfaac')) {
             push @{$self->{'errors'}}, "Your ffmpeg installation doesn't support encoding to aac audio.";
         }
     # Any errors?  disable this function
@@ -164,12 +164,14 @@ package export::ffmpeg::PSP;
     # Force to 4:3 aspect ratio
         $self->{'out_aspect'}       = 1.3333;
         $self->{'aspect_stretched'} = 1;
+    # Audio codec name changes between ffmpeg versions
+        my $acodec = $self->can_encode('libfaac') ? 'libfaac' : 'aac';
     # Build the ffmpeg string
         my $safe_title = shell_escape($episode->{'title'}.' - '.$episode->{'subtitle'});
         $self->{'ffmpeg_xtra'}  = $self->param('bit_rate', $self->{'v_bitrate'})
                                  .' -bufsize 65535'
                                  .$self->param('ab', 32)
-                                 .' -acodec aac'
+                                 .' -acodec '.$acodec
                                  ." -f psp -title $safe_title";
     # Execute the parent method
         $self->SUPER::export($episode, '.MP4');

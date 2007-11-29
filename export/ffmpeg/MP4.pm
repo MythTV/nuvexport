@@ -67,10 +67,10 @@ package export::ffmpeg::MP4;
         if (!$self->can_encode('mp4')) {
             push @{$self->{'errors'}}, "Your ffmpeg installation doesn't support encoding to mp4 file formats.";
         }
-        if (!$self->can_encode('aac')) {
+        if (!$self->can_encode('aac') && !$self->can_encode('libfaac')) {
             push @{$self->{'errors'}}, "Your ffmpeg installation doesn't support encoding to aac audio.";
         }
-        if (!$self->can_encode('mpeg4') && !$self->can_encode('h264')) {
+        if (!$self->can_encode('mpeg4') && !$self->can_encode('h264') && !$self->can_encode('libx264')) {
             push @{$self->{'errors'}}, "Your ffmpeg installation doesn't support encoding to either mpeg4 or h264 video.";
         }
     # Any errors?  disable this function
@@ -211,8 +211,13 @@ package export::ffmpeg::MP4;
             $safe_title .= ' - '.$episode->{'subtitle'};
         }
         my $safe_title = shell_escape($safe_title);
+    # Codec name changes between ffmpeg versions
+        my $codec = $self->{'mp4_codec'};
+        if ($codec eq 'h264' && $self->can_encode('libx264')) {
+            $codec = 'libx264';
+        }
     # Build the common ffmpeg string
-        my $ffmpeg_xtra  = ' -vcodec '.$self->{'mp4_codec'}
+        my $ffmpeg_xtra  = ' -vcodec '.$codec
                            .$self->param('bit_rate', $self->{'v_bitrate'})
                           ." -title $safe_title";
     # Options required for the codecs separately
@@ -296,9 +301,11 @@ package export::ffmpeg::MP4;
                            .' -deblockalpha 0 -deblockbeta 0'
                            ;
         }
+    # Audio codec name changes between ffmpeg versions
+        my $acodec = $self->can_encode('libfaac') ? 'libfaac' : 'aac';
     # Don't forget the audio, etc.
         $self->{'ffmpeg_xtra'} = $ffmpeg_xtra
-                                .' -acodec aac -ar 48000 -async 1'
+                                ." -acodec $acodec -ar 48000 -async 1"
                                 .$self->param('ab', $self->{'a_bitrate'});
     # Execute the (final pass) encode
         $self->SUPER::export($episode, '.mp4');
