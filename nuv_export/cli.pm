@@ -101,7 +101,8 @@ package nuv_export::cli;
 
 # Unknown profile?
     if ($args{'profile'} && ! defined $rc_args{'profile::'.$args{'profile'}}) {
-        die "Unknown profile:  $args{'profile'}\n";
+        print STDERR "Unknown profile:  $args{'profile'}\n";
+        exit 1;
     }
 
 # Make sure the export_prog exists
