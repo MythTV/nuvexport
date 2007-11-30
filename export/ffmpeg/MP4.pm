@@ -228,13 +228,12 @@ package export::ffmpeg::MP4;
                            .' -sc_threshold 40'
                            .' -rc_eq \'blurCplx^(1-qComp)\''
                            .$self->param('bit_rate_tolerance', $self->{'v_bitrate'})
-                           .$self->param('rc_max_rate',        768)
-                           .$self->param('rc_buffer_size',     244)
+                           .$self->param('rc_max_rate',        1500 - $self->{'a_bitrate'})
+                           .$self->param('rc_buffer_size',     2000)
                            .$self->param('i_quant_factor',     0.71428572)
                            .$self->param('b_quant_factor',     0.76923078)
                            .$self->param('max_b_frames',       0)
-                           # These should match the defaults:
-                           #.' -me epzs' #(could do "full" but it's only marginally better for less than 1/3 the speed)
+                           .' -me_method umh'
                            ;
         }
         else {
