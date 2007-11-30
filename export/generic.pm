@@ -217,9 +217,10 @@ package export::generic;
 
 # Check for a duplicate filename, and return a full path to the output filename
     sub get_outfile {
-        my $self    = shift;
-        my $episode = shift;
-        my $suffix  = ($self->{'suffix'} or shift);
+        my $self        = shift;
+        my $episode     = shift;
+        my $suffix      = ($self->{'suffix'} or shift);
+        my $ignoredupes = (shift or 0); # Used for those times when we know/hope the filename already exists.
     # Specified a name format
         my $outfile = $self->val('filename');
            $outfile ||= '%T - %S';
@@ -228,7 +229,7 @@ package export::generic;
     # Avoid some "untitled" messiness
         $outfile =~ s/\s+-\s+Untitled//sg;
     # Make sure we don't have a duplicate filename
-        if (-e $self->{'path'}.'/'.$outfile.$suffix) {
+        if (!$ignoredupes && -e $self->{'path'}.'/'.$outfile.$suffix) {
             my $count = 1;
             my $out   = $outfile;
             while (-e $self->{'path'}.'/'.$out.$suffix) {

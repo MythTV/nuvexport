@@ -146,8 +146,8 @@ package export::transcode::DVD;
     # Multiplex the streams
         my $command = "$NICE mplex -f 8 -V"
                       .' -o '.shell_escape($self->get_outfile($episode, '.mpg'))
-                      .' '.shell_escape($self->get_outfile($episode, ".$$.m2v"))
-                      .' '.shell_escape($self->get_outfile($episode, ".$$.mpa"));
+                      .' '.shell_escape($self->get_outfile($episode, ".$$.m2v", 1))
+                      .' '.shell_escape($self->get_outfile($episode, ".$$.mpa", 1));
         system($command);
     }
 
