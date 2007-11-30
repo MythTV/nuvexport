@@ -348,9 +348,11 @@ package export::transcode;
             else {
                 $pct = '~';
             }
-            print "\rprocessed:  $frames of $episode->{'total_frames'} frames at $fps fps ($pct\%, eta: ",
-                  $self->build_eta($frames, $episode->{'total_frames'}, $fps),
-                  ')  ';
+            unless (arg('noprogress')) {
+                print "\rprocessed:  $frames of $episode->{'total_frames'} frames at $fps fps ($pct\%, eta: ",
+                      $self->build_eta($frames, $episode->{'total_frames'}, $fps),
+                      ')  ';
+            }
         # Read from the transcode handle
             while (has_data($trans_h) and $l = <$trans_h>) {
                 if ($l =~ /encoding\s+frames\s+\[(\d+)-(\d+)\],\s*([\d\.]+)\s*fps,\s+EMT:\s*([\d:]+),/) {

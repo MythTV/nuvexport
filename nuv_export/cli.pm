@@ -154,6 +154,8 @@ package nuv_export::cli;
     add_arg('save_info',                   'Save text file with program details.');
     add_arg('only_save_info',              'ONLY save program details; do not encode.');
 
+    add_arg('noprogress',                  "Don't show export progress status messages.");
+
 # Load the commandline options
     add_arg('help:s',                      'Show nuvexport help');
     add_arg('debug',                       'Enable debug mode');

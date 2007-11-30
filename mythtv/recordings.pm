@@ -59,7 +59,7 @@ package mythtv::recordings;
         foreach $file (@{$rows{'rows'}}) {
             $count++;
         # Print the progress indicator
-            print "\r", sprintf('%.0f', 100 * ($num_shows / @{$rows{'rows'}})), '% ';
+            print "\r", sprintf('%.0f', 100 * ($num_shows / @{$rows{'rows'}})), '% ' unless (arg('noprogress'));
         # Load into an object
             $file = $Myth->new_recording(@$file);
         # Skip shows without cutlists?

@@ -181,7 +181,9 @@ package export::mencoder;
             else {
                 $pct = "0.00";
             }
-            print "\rprocessed:  $frames of $total_frames frames ($pct\%), $fps fps ";
+            unless (arg('noprogress')) {
+                print "\rprocessed:  $frames of $total_frames frames ($pct\%), $fps fps ";
+            }
         # Read from the mencoder handle
             while (has_data($mencoder_h) and $l = <$mencoder_h>) {
                 if ($l =~ /^Pos:.*?(\d+)f.*?\(.*?(\d+(?:\.\d+)?)fps/) {

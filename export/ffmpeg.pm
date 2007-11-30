@@ -394,9 +394,11 @@ package export::ffmpeg;
             else {
                 $pct = '~';
             }
-            print "\rprocessed:  $frames of $episode->{'total_frames'} frames at $fps fps ($pct\%, eta: ",
-                  $self->build_eta($frames, $episode->{'total_frames'}, $fps),
-                  ')  ';
+            unless (arg('noprogress')) {
+                print "\rprocessed:  $frames of $episode->{'total_frames'} frames at $fps fps ($pct\%, eta: ",
+                      $self->build_eta($frames, $episode->{'total_frames'}, $fps),
+                      ')  ';
+            }
 
         # Read from the ffmpeg handle
             while (has_data($ffmpeg_h) and $l = <$ffmpeg_h>) {

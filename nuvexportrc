@@ -186,6 +186,13 @@
 #   show_deleted = yes
 #   show_livetv  = yes
 
+#
+#  Uncomment this setting to disable the encode's progress display.  You
+#  should really only use this on the commandline for cron/user jobs where
+#  you don't want the progress updates to fill up a log or email.
+#   
+#   noprogress = yes
+
 </nuvexport>
 
 #
