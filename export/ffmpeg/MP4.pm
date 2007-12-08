@@ -233,7 +233,7 @@ package export::ffmpeg::MP4;
                            .$self->param('i_quant_factor',     0.71428572)
                            .$self->param('b_quant_factor',     0.76923078)
                            .$self->param('max_b_frames',       0)
-                           .' -me_method umh'
+                           .' -me umh'   # this will eventually be me_method, but not all ffmpeg versions support it yet
                            ;
         }
         else {
