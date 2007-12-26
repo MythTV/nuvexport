@@ -89,14 +89,14 @@ package export::generic;
             if ($self->val('crop_top') < 0 || $self->val('crop_top') > 20) {
                 die "crop_top must be a number between 0 and 20.\n";
             }
-            if ($self->val('crop_right') < 0 || $self->val('crop_right') > 5) {
-                die "crop_right must be a number between 0 and 5.\n";
+            if ($self->val('crop_right') < 0 || $self->val('crop_right') > 20) {
+                die "crop_right must be a number between 0 and 20.\n";
             }
             if ($self->val('crop_bottom') < 0 || $self->val('crop_bottom') > 20) {
                 die "crop_bottom must be a number between 0 and 20.\n";
             }
-            if ($self->val('crop_left') < 0 || $self->val('crop_left') > 5) {
-                die "crop_left must be a number between 0 and 5.\n";
+            if ($self->val('crop_left') < 0 || $self->val('crop_left') > 20) {
+                die "crop_left must be a number between 0 and 20.\n";
             }
         # Are we cropping at all?
             if ($self->{'crop_pct'}
