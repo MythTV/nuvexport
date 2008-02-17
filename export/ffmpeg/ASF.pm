@@ -49,7 +49,7 @@ package export::ffmpeg::ASF;
         if (!$self->can_encode('msmpeg4')) {
             push @{$self->{'errors'}}, "Your ffmpeg installation doesn't support encoding to msmpeg4.";
         }
-        if (!$self->can_encode('mp3')) {
+        if (!$self->can_encode('mp3') && !$self->can_encode('libmp3lame')) {
             push @{$self->{'errors'}}, "Your ffmpeg installation doesn't support encoding to mp3 audio.";
         }
     # Any errors?  disable this function
@@ -145,8 +145,9 @@ package export::ffmpeg::ASF;
                                    . ' -minrate 32 -maxrate '.(2*$self->{'v_bitrate'}).' -bt 32'
                                    . ' -bufsize 65535'
 #                                   . ' -lumi_mask 0.05 -dark_mask 0.02 -scplx_mask 0.7'
-                                   . ' -acodec mp3'
-                                   .$self->param('ab', $self->{'a_bitrate'})
+                                   . ' -acodec '
+                                   .($self->can_encode('mp3') ? 'mp3' : 'libmp3lame')
+                                   .' '.$self->param('ab', $self->{'a_bitrate'})
                                    . " -pass 2 -passlogfile '/tmp/asf.$$.log'"
                                    . ' -f asf';
         }
@@ -162,8 +163,9 @@ package export::ffmpeg::ASF;
                                       : '')
 #                                   . ' -lumi_mask 0.05 -dark_mask 0.02'
 #                                   . ' -scplx_mask 0.7'
-                                   . ' -acodec mp3'
-                                   .$self->param('ab', $self->{'a_bitrate'})
+                                   . ' -acodec '
+                                   .($self->can_encode('mp3') ? 'mp3' : 'libmp3lame')
+                                   .' '.$self->param('ab', $self->{'a_bitrate'})
                                    . ' -f asf';
         }
     # Execute the (final pass) encode

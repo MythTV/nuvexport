@@ -60,7 +60,7 @@ package export::ffmpeg::XviD;
             push @{$self->{'errors'}}, "Your ffmpeg installation doesn't support encoding to xvid.\n"
                                       ."  (It must be compiled with the --enable-libxvid option)";
         }
-        if (!$self->can_encode('mp3')) {
+        if (!$self->can_encode('mp3') && !$self->can_encode('libmp3lame')) {
             push @{$self->{'errors'}}, "Your ffmpeg installation doesn't support encoding to mp3 audio.";
         }
 
@@ -182,7 +182,9 @@ package export::ffmpeg::XviD;
                                       : '');
         }
     # Don't forget the audio, etc.
-        $self->{'ffmpeg_xtra'} .= ' -acodec mp3 -async 1'
+        $self->{'ffmpeg_xtra'} .= ' -acodec '
+                                 .($self->can_encode('mp3') ? 'mp3' : 'libmp3lame')
+                                 .' -async 1 '
                                  .$self->param('ab', $self->{'a_bitrate'})
                                  .' -f avi';
     # Execute the (final pass) encode

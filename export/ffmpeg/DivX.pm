@@ -49,7 +49,7 @@ package export::ffmpeg::DivX;
         if (!$self->can_encode('mpeg4')) {
             push @{$self->{'errors'}}, "Your ffmpeg installation doesn't support encoding to mpeg4.";
         }
-        if (!$self->can_encode('mp3')) {
+        if (!$self->can_encode('mp3') && !$self->can_encode('libmp3lame')) {
             push @{$self->{'errors'}}, "Your ffmpeg installation doesn't support encoding to mp3 audio.";
         }
     # Any errors?  disable this function
@@ -157,8 +157,9 @@ package export::ffmpeg::DivX;
                                    . ' -mv4'
                                    . ' -part'
                                    . ' -vtag divx'
-                                   . ' -acodec mp3'
-                                   .$self->param('ab', $self->{'a_bitrate'})
+                                   . ' -acodec '
+                                   .($self->can_encode('mp3') ? 'mp3' : 'libmp3lame')
+                                   .' '.$self->param('ab', $self->{'a_bitrate'})
                                    . " -pass 2 -passlogfile '/tmp/divx.$$.log'"
                                    . ' -f avi';
         }
@@ -178,8 +179,9 @@ package export::ffmpeg::DivX;
                                    . ' -mv4'
                                    . ' -part'
                                    . ' -vtag divx'
-                                   . ' -acodec mp3'
-                                   .$self->param('ab', $self->{'a_bitrate'})
+                                   . ' -acodec '
+                                   .($self->can_encode('mp3') ? 'mp3' : 'libmp3lame')
+                                   .' '.$self->param('ab', $self->{'a_bitrate'})
                                    . ' -f avi';
         }
     # Execute the (final pass) encode

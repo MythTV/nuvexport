@@ -45,7 +45,7 @@ package export::ffmpeg::MP3;
             or push @{$self->{'errors'}}, 'You need id3tag to export an mp3.';
 
     # Can we even encode vcd?
-        if (!$self->can_encode('mp3')) {
+        if (!$self->can_encode('mp3') && !$self->can_encode('libmp3lame')) {
             push @{$self->{'errors'}}, "Your ffmpeg installation doesn't support encoding to mp3 audio.";
         }
     # Any errors?  disable this function
@@ -79,7 +79,9 @@ package export::ffmpeg::MP3;
         my $episode = shift;
     # Build the ffmpeg string
         $self->{'ffmpeg_xtra'} = $self->param('ab', $self->val('bitrate'))
-                                .' -acodec mp3 -f mp3';
+                                .' -acodec '
+                                .($self->can_encode('mp3') ? 'mp3' : 'libmp3lame')
+                                .' -f mp3';
     # Execute ffmpeg
         $self->SUPER::export($episode, '.mp3');
     # Now tag it
