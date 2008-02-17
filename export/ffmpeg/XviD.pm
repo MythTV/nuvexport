@@ -150,7 +150,7 @@ package export::ffmpeg::XviD;
                              . $self->param('bit_rate_tolerance', 32)
                              . ' -bufsize 65535'
                             : '')
-                          .' -flags +4mv+trell+loop'
+                          .' -flags +mv4+trell+loop'
                           .' -aic 1'
                           .' -mbd 1'
                           .' -cmp 2 -subcmp 2'
