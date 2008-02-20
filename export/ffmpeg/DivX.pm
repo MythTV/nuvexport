@@ -158,7 +158,7 @@ package export::ffmpeg::DivX;
                                    . ' -part'
                                    . ' -vtag divx'
                                    . ' -acodec '
-                                   .($self->can_encode('mp3') ? 'mp3' : 'libmp3lame')
+                                   .($self->can_encode('libmp3lame') ? 'libmp3lame' : 'mp3')
                                    .' '.$self->param('ab', $self->{'a_bitrate'})
                                    . " -pass 2 -passlogfile '/tmp/divx.$$.log'"
                                    . ' -f avi';
@@ -180,7 +180,7 @@ package export::ffmpeg::DivX;
                                    . ' -part'
                                    . ' -vtag divx'
                                    . ' -acodec '
-                                   .($self->can_encode('mp3') ? 'mp3' : 'libmp3lame')
+                                   .($self->can_encode('libmp3lame') ? 'libmp3lame' : 'mp3')
                                    .' '.$self->param('ab', $self->{'a_bitrate'})
                                    . ' -f avi';
         }

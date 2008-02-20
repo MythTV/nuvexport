@@ -183,7 +183,7 @@ package export::ffmpeg::XviD;
         }
     # Don't forget the audio, etc.
         $self->{'ffmpeg_xtra'} .= ' -acodec '
-                                 .($self->can_encode('mp3') ? 'mp3' : 'libmp3lame')
+                                 .($self->can_encode('libmp3lame') ? 'libmp3lame' : 'mp3')
                                  .' -async 1 '
                                  .$self->param('ab', $self->{'a_bitrate'})
                                  .' -f avi';

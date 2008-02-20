@@ -146,7 +146,7 @@ package export::ffmpeg::ASF;
                                    . ' -bufsize 65535'
 #                                   . ' -lumi_mask 0.05 -dark_mask 0.02 -scplx_mask 0.7'
                                    . ' -acodec '
-                                   .($self->can_encode('mp3') ? 'mp3' : 'libmp3lame')
+                                   .($self->can_encode('libmp3lame') ? 'libmp3lame' : 'mp3')
                                    .' '.$self->param('ab', $self->{'a_bitrate'})
                                    . " -pass 2 -passlogfile '/tmp/asf.$$.log'"
                                    . ' -f asf';
@@ -164,7 +164,7 @@ package export::ffmpeg::ASF;
 #                                   . ' -lumi_mask 0.05 -dark_mask 0.02'
 #                                   . ' -scplx_mask 0.7'
                                    . ' -acodec '
-                                   .($self->can_encode('mp3') ? 'mp3' : 'libmp3lame')
+                                   .($self->can_encode('libmp3lame') ? 'libmp3lame' : 'mp3')
                                    .' '.$self->param('ab', $self->{'a_bitrate'})
                                    . ' -f asf';
         }
