@@ -1,7 +1,7 @@
 #
 # ffmpeg-based XviD export module for nuvexport.
 #
-# @url       $URL$
+# @url       $URL: svn+ssh://xris@svn.mythtv.org/var/lib/svn/trunk/mythextras/nuvexport/export/ffmpeg/XviD.pm $
 # @date      $Date$
 # @version   $Revision$
 # @author    $Author$
@@ -60,7 +60,7 @@ package export::ffmpeg::XviD;
             push @{$self->{'errors'}}, "Your ffmpeg installation doesn't support encoding to xvid.\n"
                                       ."  (It must be compiled with the --enable-libxvid option)";
         }
-        if (!$self->can_encode('mp3')) {
+        if (!$self->can_encode('mp3') && !$self->can_encode('libmp3lame')) {
             push @{$self->{'errors'}}, "Your ffmpeg installation doesn't support encoding to mp3 audio.";
         }
 
@@ -150,7 +150,7 @@ package export::ffmpeg::XviD;
                              . $self->param('bit_rate_tolerance', 32)
                              . ' -bufsize 65535'
                             : '')
-                          .' -flags +4mv+trell+loop'
+                          .' -flags +mv4+trell+loop'
                           .' -aic 1'
                           .' -mbd 1'
                           .' -cmp 2 -subcmp 2'
@@ -182,7 +182,9 @@ package export::ffmpeg::XviD;
                                       : '');
         }
     # Don't forget the audio, etc.
-        $self->{'ffmpeg_xtra'} .= ' -acodec mp3 -async 1'
+        $self->{'ffmpeg_xtra'} .= ' -acodec '
+                                 .($self->can_encode('libmp3lame') ? 'libmp3lame' : 'mp3')
+                                 .' -async 1 '
                                  .$self->param('ab', $self->{'a_bitrate'})
                                  .' -f avi';
     # Execute the (final pass) encode

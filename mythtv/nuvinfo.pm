@@ -248,10 +248,12 @@ package mythtv::nuvinfo;
     # European decimals...
         $aspect =~ s/\,/\./;
     # Parse out decimal formats
-        if ($aspect == 1)          { return '1:1';    }
-        elsif ($aspect =~ m/^1.3/) { return '4:3';    }
-        elsif ($aspect =~ m/^1.7/) { return '16:9';   }
-        elsif ($aspect == 2.21)    { return '2.21:1'; }
+        if ($aspect == 1)           { return '1:1';    }
+        elsif ($aspect =~ m/^1.3/)  { return '4:3';    }
+        elsif ($aspect =~ m/^1.5$/) { return '3:2';    }
+        elsif ($aspect =~ m/^1.55/) { return '14:9';   }
+        elsif ($aspect =~ m/^1.7/)  { return '16:9';   }
+        elsif ($aspect == 2.21)     { return '2.21:1'; }
     # Unknown aspect
         print STDERR "Unknown aspect ratio:  $aspect\n";
         return $aspect.':1';
@@ -267,9 +269,11 @@ package mythtv::nuvinfo;
             return $w / $h;
         }
     # Parse out decimal formats
-        if ($aspect eq '1')        { return  1;     }
-        elsif ($aspect =~ m/^1.3/) { return  4 / 3; }
-        elsif ($aspect =~ m/^1.7/) { return 16 / 9; }
+        if ($aspect eq '1')         { return  1;     }
+        elsif ($aspect =~ m/^1.3/)  { return  4 / 3; }
+        elsif ($aspect =~ m/^1.5$/) { return  3 / 2; }
+        elsif ($aspect =~ m/^1.55/) { return 14 / 9; }
+        elsif ($aspect =~ m/^1.7/)  { return 16 / 9; }
     # Unknown aspect
         return $aspect;
     }

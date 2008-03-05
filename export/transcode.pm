@@ -392,7 +392,8 @@ package export::transcode;
                     $str .= "See transcode warnings:\n\n$warnings";
                 }
                 else {
-                    $str .= "Please use the --debug option to figure out what went wrong.\n\n";
+                    $str .= "Please use the --debug option to figure out what went wrong.\n"    
+                           ."http://www.mythtv.org/wiki/index.php/Nuvexport#Debug_Mode\n\n";
                 }
                 die $str;
             }

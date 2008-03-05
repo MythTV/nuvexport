@@ -313,7 +313,9 @@ package nuv_export::ui;
             $query .= ' ' if ($num_episodes > 100 && $count < 100);
             $query .= "$count. ";
         # Print out the show name
-            $query .= "$episode->{'title'}:$newline";
+            $query .= "$episode->{'title'}";
+            $query .= ":" if ($episode->{'subtitle'} && $episode->{'subtitle'} ne 'Untitled');
+            $query .= "$newline";
             $query .= "$episode->{'subtitle'} " if ($episode->{'subtitle'} && $episode->{'subtitle'} ne 'Untitled');
             $query .= "($episode->{'showtime'}) ".$episode->{'finfo'}{'width'}.'x'.$episode->{'finfo'}->{'height'}
                      .' '.$episode->{'finfo'}{'video_type'}.' ('.$episode->{'finfo'}{'aspect'}.')';

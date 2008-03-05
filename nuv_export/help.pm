@@ -2,7 +2,7 @@
 #
 # help
 #
-# @url       $URL$
+# @url       $URL: svn+ssh://xris@svn.mythtv.org/var/lib/svn/trunk/mythextras/nuvexport/nuv_export/help.pm $
 # @date      $Date$
 # @version   $Revision$
 # @author    $Author$
