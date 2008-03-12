@@ -95,6 +95,11 @@ package nuv_export::shared_utils;
             }
             usleep(100000) while (wait > 0);
         }
+    # Tell people what to do with debug mode
+       if ($DEBUG) {
+           print "\n\nPlease see the following article for what to do with this information:\n\n",
+                 "    http://www.mythtv.org/wiki/index.php/Nuvexport#Debug_Mode\n\n";
+       }
     }
 
 # Clear the screen

@@ -14,7 +14,7 @@
     }
 
     if (arg('help') eq 'debug') {
-        print "Please read https://svn.forevermore.net/nuvexport/wiki/debug\n";
+        print "Please read http://www.mythtv.org/wiki/index.php/Nuvexport#Debug_Mode\n";
     }
 
     else {
