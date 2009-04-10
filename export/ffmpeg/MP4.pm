@@ -207,9 +207,10 @@ package export::ffmpeg::MP4;
             $codec = 'libx264';
         }
     # Build the common ffmpeg string
-        my $ffmpeg_xtra  = ' -vcodec '.$codec
-                           .$self->param('bit_rate', $self->{'v_bitrate'})
-                          ." -title $safe_title";
+        my $ffmpeg_xtra  =
+             ' -vcodec '.$codec
+            .$self->param('bit_rate', $self->{'v_bitrate'})
+            ;
     # Options required for the codecs separately
         if ($self->{'mp4_codec'} eq 'h264') {
             $ffmpeg_xtra .= ' -level 30'
