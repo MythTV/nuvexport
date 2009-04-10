@@ -409,12 +409,12 @@ package export::ffmpeg;
                     die "\n\nffmpeg had critical errors:\n\n$warnings";
                 }
             # Most likely a misconfigured command line
-                elsif ($l =~ /^Unable\s(?:to|for)\sfind/m) {
+                elsif ($l =~ /^Unable\s(?:to|for)\s(?:find|parse)/m) {
                     $warnings .= $l;
                     die "\n\nffmpeg had critical errors:\n\n$warnings";
                 }
             # Another error?
-                elsif ($l =~ /\bError\swhile\b/m) {
+                elsif ($l =~ /\b(?:Error\swhile|Invalid\svalue)\b/m) {
                     $warnings .= $l;
                     die "\n\nffmpeg had critical errors:\n\n$warnings";
                 }
