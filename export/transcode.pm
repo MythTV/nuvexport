@@ -91,6 +91,8 @@ package export::transcode;
 
     # Start the transcode command
         $transcode = "$NICE transcode"
+                   # No colored log messages (too much work to parse)
+                    .' --log_no_color'
                    # Only print status every 16 frames -- prevents buffer-related slowdowns
                     .'  --progress_meter 2 --progress_rate 16'
                     ;
@@ -372,10 +374,10 @@ package export::transcode;
                     $fps    = $status{'fps'};
                 }
             # Look for error messages
-                elsif ($l =~ m/\[transcode\] warning/) {
+                elsif ($l =~ m/\]\W+warning/i) {
                     $warnings .= $l;
                 }
-                elsif ($l =~ m/\[transcode\] critical/ || $l =~ m/segmentation fault/i) {
+                elsif ($l =~ m/\]\W+critical/i || $l =~ m/segmentation fault/i) {
                     $warnings .= $l;
                     die "\n\nTranscode had critical errors:\n\n$warnings";
                 }
