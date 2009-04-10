@@ -72,24 +72,29 @@ package export::ffmpeg;
     # Check the ffmpeg version
         if (!defined $self->{'ffmpeg_vers'}) {
             $data = `$ffmpeg -version 2>&1`;
-            if ($data =~ m/ffmpeg\sversion\s0.4.9-\d+_r(\d+)\.\w+\.at/si) {
-                $self->{'ffmpeg_vers'}  = 'svn';
-                $self->{'ffmpeg_build'} = $1;
+            if ($data =~ m/ffmpeg\sversion\s0.5-/si) {
+                $self->{'ffmpeg_vers'}  = '0.5';
             }
-            elsif ($data =~ m/ffmpeg\sversion\s(.+?),(?:\sbuild\s(\d+))?/si) {
-                $self->{'ffmpeg_vers'}  = lc($1);
-                $self->{'ffmpeg_build'} = $2;
-                if ($self->{'ffmpeg_vers'} =~ /^svn-r(.+?)$/) {
-                    $self->{'ffmpeg_vers'}  = 'svn';
-                    $self->{'ffmpeg_build'} = $1;
-                }
+            # Disabled unti I need the formatting again to detect wacky ffmpeg
+            # versions if they go back to releasing things the old way.
+            #elsif ($data =~ m/ffmpeg\sversion\s0.4.9-\d+_r(\d+)\.\w+\.at/si) {
+            #    $self->{'ffmpeg_vers'}  = 'svn';
+            #    $self->{'ffmpeg_build'} = $1;
+            #}
+            #elsif ($data =~ m/ffmpeg\sversion\s(.+?),(?:\sbuild\s(\d+))?/si) {
+            #    $self->{'ffmpeg_vers'}  = lc($1);
+            #    $self->{'ffmpeg_build'} = $2;
+            #    if ($self->{'ffmpeg_vers'} =~ /^svn-r(.+?)$/) {
+            #        $self->{'ffmpeg_vers'}  = 'svn';
+            #        $self->{'ffmpeg_build'} = $1;
+            #    }
             }
             else {
                 push @{$self->{'errors'}}, 'Unrecognizeable ffmpeg version string.';
             }
         }
-        if ($self->{'ffmpeg_vers'} !~ /cvs|svn/) {
-            die "This version of nuvexport requires either the cvs or svn version of ffmpeg.\n";
+        if ($self->{'ffmpeg_vers'} ne '0.5') {
+            die "This version of nuvexport requires ffmpeg 0.5.\n";
         }
     # Audio only?
         $self->{'audioonly'} = $audioonly;

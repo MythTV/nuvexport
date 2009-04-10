@@ -113,25 +113,19 @@ package export::ffmpeg::MP4;
                                          'yesno',
                                          $self->val('ipod'));
         # Video codec
-            if ($self->{'ffmpeg_vers'} eq 'svn') {
-                while (1) {
-                    my $codec = query_text('Video codec (mpeg4 or h264)?',
-                                           'string',
-                                           $self->{'mp4_codec'});
-                    if ($codec =~ /^m/) {
-                        $self->{'mp4_codec'} = 'mpeg4';
-                        last;
-                    }
-                    elsif ($codec =~ /^h/) {
-                        $self->{'mp4_codec'} = 'h264';
-                        last;
-                    }
-                    print "Please choose either mpeg4 or h264\n";
+            while (1) {
+                my $codec = query_text('Video codec (mpeg4 or h264)?',
+                                       'string',
+                                       $self->{'mp4_codec'});
+                if ($codec =~ /^m/) {
+                    $self->{'mp4_codec'} = 'mpeg4';
+                    last;
                 }
-            }
-            else {
-                $self->{'mp4_codec'} = 'mpeg4';
-                print "Using the mpeg4 codec (h.264 mp4/ipod encoding requires the svn version of ffmpeg.)\n";
+                elsif ($codec =~ /^h/) {
+                    $self->{'mp4_codec'} = 'h264';
+                    last;
+                }
+                print "Please choose either mpeg4 or h264\n";
             }
         # Video bitrate options
             $self->{'vbr'} = query_text('Variable bitrate video?',
@@ -165,10 +159,6 @@ package export::ffmpeg::MP4;
             $self->{'v_bitrate'} = query_text('Video bitrate?',
                                               'int',
                                               $self->val('v_bitrate'));
-        }
-    # Complain about h264
-        if ($self->{'mp4_codec'} eq 'h264' && $self->{'ffmpeg_vers'} ne 'svn') {
-            die "h.264 mp4/ipod encoding requires the svn version of ffmpeg.\n";
         }
     # Loop, in case we need to verify ipod compatibility
         while (1) {
@@ -237,7 +227,8 @@ package export::ffmpeg::MP4;
                            ;
         }
         else {
-           $ffmpeg_xtra .= ' -flags +mv4+trell+loop'
+           $ffmpeg_xtra .= ' -flags +mv4+loop'
+                          .' -trellis 1'
                           .' -aic 1'
                           .' -mbd 1'
                           .' -cmp 2 -subcmp 2'
