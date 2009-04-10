@@ -281,7 +281,7 @@ package export::ffmpeg::MP4;
             $ffmpeg_xtra .= ' -refs '.($self->val('ipod') ? 2 : 7)
                            .' -subq 7'
                            .' -partitions parti4x4+parti8x8+partp4x4+partp8x8+partb8x8'
-                           .' -flags2 +bpyramid+wpred+mixed_refs+8x8dct+brdo'
+                           .' -flags2 +bpyramid+wpred+mixed_refs+8x8dct'
                            .' -me_range 21'
                            .' -trellis 2'
                            .' -chroma 1'
