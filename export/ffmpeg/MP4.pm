@@ -227,9 +227,8 @@ package export::ffmpeg::MP4;
                            ;
         }
         else {
-           $ffmpeg_xtra .= ' -flags +mv4+loop'
+           $ffmpeg_xtra .= ' -flags +mv4+loop+aic'
                           .' -trellis 1'
-                          .' -aic 1'
                           .' -mbd 1'
                           .' -cmp 2 -subcmp 2'
                           ;

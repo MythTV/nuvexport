@@ -150,12 +150,10 @@ package export::ffmpeg::XviD;
                              . $self->param('bit_rate_tolerance', 32)
                              . ' -bufsize 65535'
                             : '')
-                          .' -flags +mv4+loop'
+                          .' -flags +mv4+loop+aic+cgop'
                           .' -trellis 1'
-                          .' -aic 1'
                           .' -mbd 1'
                           .' -cmp 2 -subcmp 2'
-                          .' -cgop 1'
                            .$self->param('b_quant_factor',     150)
                            .$self->param('b_quant_offset',     100)
                            .$self->param('max_b_frames',       1)
