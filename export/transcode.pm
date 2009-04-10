@@ -32,8 +32,16 @@ package export::transcode;
     sub init_transcode {
         my $self = shift;
     # Make sure we have transcode
-        find_program('transcode')
+        my $transcode = find_program('transcode')
             or push @{$self->{'errors'}}, 'You need transcode to use this exporter.';
+    # Check the transcode version
+        my $data = `$transcode -version 2>&1`;
+        if ($data =~ m/transcode\s+v(\d+\.\d+)\b/si) {
+            $self->{'transcode_vers'}  = $1;
+        }
+        if ($self->{'transcode_vers'} < 1.1) {
+            push @{$self->{'errors'}}, "This version of nuvexport requires transcode 1.1.\n";
+        }
     }
 
 # Load default settings
@@ -392,7 +400,7 @@ package export::transcode;
                     $str .= "See transcode warnings:\n\n$warnings";
                 }
                 else {
-                    $str .= "Please use the --debug option to figure out what went wrong.\n"    
+                    $str .= "Please use the --debug option to figure out what went wrong.\n"
                            ."http://www.mythtv.org/wiki/index.php/Nuvexport#Debug_Mode\n\n";
                 }
                 die $str;

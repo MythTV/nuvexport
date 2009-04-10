@@ -21,7 +21,7 @@ Requires:  perl-DateManip
 Requires:  perl-DBD-MySQL
 Requires:  perl-DBI
 Requires:  perl-MythTV >= 0.21
-Requires:  transcode   >= 1.0
+Requires:  transcode   >= 1.1
 Requires:  ffmpeg      >= 0.5
 Requires:  mjpegtools  >= 1.6.2
 Requires:  mplayer

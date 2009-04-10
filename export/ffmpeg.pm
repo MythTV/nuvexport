@@ -93,8 +93,8 @@ package export::ffmpeg;
                 push @{$self->{'errors'}}, 'Unrecognizeable ffmpeg version string.';
             }
         }
-        if ($self->{'ffmpeg_vers'} ne '0.5') {
-            die "This version of nuvexport requires ffmpeg 0.5.\n";
+        if ($self->{'ffmpeg_vers'} < 0.5) {
+            push @{$self->{'errors'}}, "This version of nuvexport requires ffmpeg 0.5.\n";
         }
     # Audio only?
         $self->{'audioonly'} = $audioonly;
