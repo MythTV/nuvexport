@@ -98,17 +98,6 @@ package export::ffmpeg;
         }
     # Audio only?
         $self->{'audioonly'} = $audioonly;
-    # Load the parameter version?
-        $data = `$ffmpeg -h 2>&1`;
-        if ($data =~ /bit_rate_tolerance/) {
-            $self->{'ffmpeg_param_vers'} = 0;
-        }
-        elsif ($data =~ /-ab\b.+set\s+bitrate\s+\(in\s+bits\/s\)/) {
-            $self->{'ffmpeg_param_vers'} = 2;
-        }
-        else {
-            $self->{'ffmpeg_param_vers'} = 1;
-        }
     # Gather the supported codecs
         $data         = `$ffmpeg -formats 2>&1`;
         my ($formats) = $data =~ /(?:^|\n\s*)File\sformats:\s*\n(.+?\n)\s*\n/s;
@@ -144,39 +133,35 @@ package export::ffmpeg;
         my $self  = shift;
         my $param = lc(shift);
         my $value = shift;
-    # Which version?
-        if ($self->{'ffmpeg_param_vers'} >= 2) {
-            return param_pair('ab',             $value.'k') if ($param eq 'ab');
-        }
-        if ($self->{'ffmpeg_param_vers'} >= 1) {
-            return param_pair('ac',             $value)     if ($param eq 'channels');
-            return param_pair('ar',             $value)     if ($param eq 'sample_rate');
-            return param_pair('b',              $value.'k') if ($param eq 'bit_rate');
-            return param_pair('b_qfactor',      $value)     if ($param eq 'b_quant_factor');
-            return param_pair('b_qoffset',      $value)     if ($param eq 'b_quant_offset');
-            return param_pair('bf',             $value)     if ($param eq 'max_b_frames');
-            return param_pair('bt',             $value.'k') if ($param eq 'bit_rate_tolerance');
-            return param_pair('bufsize',        $value.'k') if ($param eq 'rc_buffer_size');
-            return param_pair('bug',            $value)     if ($param eq 'bugs');
-            return param_pair('error',          $value)     if ($param eq 'error_rate');
-            return param_pair('g',              $value)     if ($param eq 'gop_size');
-            return param_pair('i_qfactor',      $value)     if ($param eq 'i_quant_factor');
-            return param_pair('i_qoffset',      $value)     if ($param eq 'i_quant_offset');
-            return param_pair('maxrate',        $value.'k') if ($param eq 'rc_max_rate');
-            return param_pair('mblmax',         $value)     if ($param eq 'mb_lmax');
-            return param_pair('mblmin',         $value)     if ($param eq 'mb_lmin');
-            return param_pair('mepc',           $value)     if ($param eq 'me_penalty_compensation');
-            return param_pair('minrate',        $value)     if ($param eq 'rc_min_rate');
-            return param_pair('qcomp',          $value)     if ($param eq 'qcompress');
-            return param_pair('qdiff',          $value)     if ($param eq 'max_qdiff');
-            return param_pair('qsquish',        $value)     if ($param eq 'rc_qsquish');
-            return param_pair('rc_init_cplx',   $value)     if ($param eq 'rc_initial_cplx');
-            return param_pair('skip_exp',       $value)     if ($param eq 'frame_skip_exp');
-            return param_pair('skip_factor',    $value)     if ($param eq 'frame_skip_factor');
-            return param_pair('skip_threshold', $value)     if ($param eq 'frame_skip_threshold');
-            return param_pair('threads',        $value)     if ($param eq 'thread_count');
-        }
-    # Unknown, just return the parameter
+    # No more version checks (until ffmpeg starts doing crazy releases again)
+        return param_pair('ab',             $value.'k') if ($param eq 'ab');
+        return param_pair('ac',             $value)     if ($param eq 'channels');
+        return param_pair('ar',             $value)     if ($param eq 'sample_rate');
+        return param_pair('b',              $value.'k') if ($param eq 'bit_rate');
+        return param_pair('b_qfactor',      $value)     if ($param eq 'b_quant_factor');
+        return param_pair('b_qoffset',      $value)     if ($param eq 'b_quant_offset');
+        return param_pair('bf',             $value)     if ($param eq 'max_b_frames');
+        return param_pair('bt',             $value.'k') if ($param eq 'bit_rate_tolerance');
+        return param_pair('bufsize',        $value.'k') if ($param eq 'rc_buffer_size');
+        return param_pair('bug',            $value)     if ($param eq 'bugs');
+        return param_pair('error',          $value)     if ($param eq 'error_rate');
+        return param_pair('g',              $value)     if ($param eq 'gop_size');
+        return param_pair('i_qfactor',      $value)     if ($param eq 'i_quant_factor');
+        return param_pair('i_qoffset',      $value)     if ($param eq 'i_quant_offset');
+        return param_pair('maxrate',        $value.'k') if ($param eq 'rc_max_rate');
+        return param_pair('mblmax',         $value)     if ($param eq 'mb_lmax');
+        return param_pair('mblmin',         $value)     if ($param eq 'mb_lmin');
+        return param_pair('mepc',           $value)     if ($param eq 'me_penalty_compensation');
+        return param_pair('minrate',        $value)     if ($param eq 'rc_min_rate');
+        return param_pair('qcomp',          $value)     if ($param eq 'qcompress');
+        return param_pair('qdiff',          $value)     if ($param eq 'max_qdiff');
+        return param_pair('qsquish',        $value)     if ($param eq 'rc_qsquish');
+        return param_pair('rc_init_cplx',   $value)     if ($param eq 'rc_initial_cplx');
+        return param_pair('skip_exp',       $value)     if ($param eq 'frame_skip_exp');
+        return param_pair('skip_factor',    $value)     if ($param eq 'frame_skip_factor');
+        return param_pair('skip_threshold', $value)     if ($param eq 'frame_skip_threshold');
+        return param_pair('threads',        $value)     if ($param eq 'thread_count');
+    # Unknown version or nothing wacky, just return the parameter
         return param_pair($param, $value);
     }
 
