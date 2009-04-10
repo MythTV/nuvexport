@@ -214,7 +214,7 @@ package export::ffmpeg::MP4;
     # Options required for the codecs separately
         if ($self->{'mp4_codec'} eq 'h264') {
             $ffmpeg_xtra .= ' -level 30'
-                           .' -flags loop'
+                           .' -flags loop+slice'
                            .' -g 250 -keyint_min 25'
                            .' -sc_threshold 40'
                            .' -rc_eq \'blurCplx^(1-qComp)\''
@@ -284,8 +284,6 @@ package export::ffmpeg::MP4;
                            .' -flags2 +bpyramid+wpred+mixed_refs+8x8dct'
                            .' -me_range 21'
                            .' -trellis 2'
-                           .' -chroma 1'
-                           .' -slice 2'
                            .' -cmp 1'
                            # These should match the defaults:
                            .' -deblockalpha 0 -deblockbeta 0'
