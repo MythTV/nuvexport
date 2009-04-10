@@ -91,9 +91,8 @@ package export::transcode;
 
     # Start the transcode command
         $transcode = "$NICE transcode"
-                   # -V is now the default, but need to keep using it because people are still using an older version of transcode
-                    .' -V'                     # use YV12/I420 instead of RGB, for faster processing
-                    .' --print_status 16'      # Only print status every 16 frames -- prevents buffer-related slowdowns
+                   # Only print status every 16 frames -- prevents buffer-related slowdowns
+                    .'  --progress_meter 2 --progress_rate 16'
                     ;
     # Take advantage of multiple CPU's?
     # * This has been disabled because it looks like it causes jerkiness.
@@ -363,9 +362,14 @@ package export::transcode;
             }
         # Read from the transcode handle
             while (has_data($trans_h) and $l = <$trans_h>) {
-                if ($l =~ /encoding\s+frames\s+\[(\d+)-(\d+)\],\s*([\d\.]+)\s*fps,\s+EMT:\s*([\d:]+),/) {
-                    $frames = int($2);
-                    $fps    = $3;
+                if ($l =~ /^encoding=/) {
+                    my %status;
+                    foreach my $pair (split(/\s/, $l)) {
+                        my ($k,$v) = split(/=/, $pair);
+                        $status{$k} = $v;
+                    }
+                    $frames = int($status{'frame'});
+                    $fps    = $status{'fps'};
                 }
             # Look for error messages
                 elsif ($l =~ m/\[transcode\] warning/) {
