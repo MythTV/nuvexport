@@ -213,7 +213,7 @@ package export::ffmpeg::MP4;
     # Options required for the codecs separately
         if ($self->{'mp4_codec'} eq 'h264') {
             $ffmpeg_xtra .= ' -level 30'
-                           .' -loop 1'
+                           .' -flags loop'
                            .' -g 250 -keyint_min 25'
                            .' -sc_threshold 40'
                            .' -rc_eq \'blurCplx^(1-qComp)\''
@@ -223,7 +223,7 @@ package export::ffmpeg::MP4;
                            .$self->param('i_quant_factor',     0.71428572)
                            .$self->param('b_quant_factor',     0.76923078)
                            .$self->param('max_b_frames',       0)
-                           .' -me umh'   # this will eventually be me_method, but not all ffmpeg versions support it yet
+                           .' -me_method umh'
                            ;
         }
         else {
