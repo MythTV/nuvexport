@@ -88,7 +88,7 @@ package export::ffmpeg;
             #        $self->{'ffmpeg_vers'}  = 'svn';
             #        $self->{'ffmpeg_build'} = $1;
             #    }
-            }
+            #}
             else {
                 push @{$self->{'errors'}}, 'Unrecognizeable ffmpeg version string.';
             }
