@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+# vim:ts=4:sw=4:ai:et:si:sts=4
 #
 # ffmpeg-based MP4 (iPod) video module for nuvexport.
 #
@@ -300,6 +300,4 @@ package export::ffmpeg::MP4;
     }
 
 1;  #return true
-
-# vim:ts=4:sw=4:ai:et:si:sts=4
 

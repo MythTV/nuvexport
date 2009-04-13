@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+# vim:ts=4:sw=4:ai:et:si:sts=4
 #
 # help
 #
@@ -24,5 +24,3 @@
     }
 
     exit;
-
-# vim:ts=4:sw=4:ai:et:si:sts=4
