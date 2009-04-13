@@ -365,7 +365,7 @@ package export::ffmpeg;
         $fps = 0.0;
         $start = time();
         if (!$episode->{'total_frames'} || $episode->{'total_frames'} < 1) {
-            $episode->{'total_frames'} = $episode->{'last_frame'} > 0
+            $episode->{'total_frames'} = ($episode->{'last_frame'} && $episode->{'last_frame'} > 0)
                                          ? $episode->{'last_frame'} - $episode->{'cutlist_frames'}
                                          : 0;
         }
