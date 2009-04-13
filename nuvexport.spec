@@ -5,7 +5,7 @@
 Name:       nuvexport
 Version:    0.5
 Release:    0.20090413.svn
-License:    GPL
+License:    GPLv2
 Summary:    mythtv nuv video file conversion script
 URL:        http://forevermore.net/nuvexport/
 Group:      Applications/Multimedia
@@ -21,6 +21,7 @@ Requires:  perl-DateManip
 Requires:  perl-DBD-MySQL
 Requires:  perl-DBI
 Requires:  perl-MythTV >= 0.21
+Requires:  id3lib
 Requires:  transcode   >= 1.1
 Requires:  ffmpeg      >= 0.5
 Requires:  mjpegtools  >= 1.6.2
@@ -45,17 +46,26 @@ of several different formats, including SVCD/DVD mpeg and XviD avi.
 [  %{buildroot} != "/" ] && rm -rf %{buildroot}
 %{makeinstall}
 
+# Remove incorrect attributes
+chmod 644 %{buildroot}/%{_sysconfdir}/nuvexportrc
+find %{buildroot} -name \*pm -exec chmod 644 {} \;
+
 %clean
 [  %{buildroot} != "/" ] && rm -rf %{buildroot}
 rm -f $RPM_BUILD_DIR/file.list.%{name}
 
 %files
-%defattr(-, root, root)
-%{_bindir}/*
+%defattr(-, root, root, -)
+%doc COPYING
+%{_bindir}/nuv*
 %{_datadir}/nuvexport/
-%config %{_sysconfdir}/*
+%config(noreplace) %{_sysconfdir}/nuvexportrc
 %doc COPYING
 
 %changelog
+
+* Mon Apr 13 2008 Chris Petersen <rpm@forevermore.net>
+- Update spec to be closer to rpmfusion preferences
+
 * Tue Dec 7  2004 Chris Petersen <rpm@forevermore.net>
 - Built first spec
