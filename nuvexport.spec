@@ -4,7 +4,7 @@
 
 Name:       nuvexport
 Version:    0.5
-Release:    0.20090413.svn
+Release:    0.20090726.svn
 License:    GPLv2
 Summary:    Export MythTV .nuv and .mpeg files to other formats
 URL:        http://forevermore.net/nuvexport/

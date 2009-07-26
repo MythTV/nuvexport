@@ -73,7 +73,10 @@ package export::ffmpeg;
         if (!defined $self->{'ffmpeg_vers'}) {
             $data = `$ffmpeg -version 2>&1`;
             if ($data =~ m/ffmpeg\sversion\s0.5-/si) {
-                $self->{'ffmpeg_vers'}  = '0.5';
+                $self->{'ffmpeg_vers'} = '0.5';
+            }
+            elsif ($data =~ m/ffmpeg\sversion\sSVN-r(\d+),/si) {
+                $self->{'ffmpeg_vers'} = $1;
             }
             # Disabled unti I need the formatting again to detect wacky ffmpeg
             # versions if they go back to releasing things the old way.
