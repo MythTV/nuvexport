@@ -253,6 +253,7 @@ package export::ffmpeg::MP4;
         # Add all possible temporary files to the list
             push @tmpfiles, 'x264_2pass.log',
                             'x264_2pass.log.temp',
+                            'x264_2pass.log.mbtree',
                             'ffmpeg2pass-0.log';
         # Build the ffmpeg string
             print "First pass...\n";
