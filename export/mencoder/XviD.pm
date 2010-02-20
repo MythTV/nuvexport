@@ -157,7 +157,7 @@ package export::mencoder::XviD;
                 $self->{'mencoder_xtra'} .= " -xvidencopts fixed_quant=".$self->{'quantisation'};
             }
             else {
-                $self->{'mencoder_xtra'} .= ":bitrate=$self->{'v_bitrate'} ";
+                $self->{'mencoder_xtra'} .= " -xvidencopts bitrate=$self->{'v_bitrate'} ";
             }
         }
     # Execute the (final pass) encode
