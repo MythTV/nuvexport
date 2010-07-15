@@ -78,6 +78,11 @@ package export::ffmpeg;
             elsif ($data =~ m/ffmpeg\sversion\sSVN-r(\d+),/si) {
                 $self->{'ffmpeg_vers'} = $1;
             }
+            elsif ($data =~ m/ffmpeg\sversion\sSVN-r(\d+\.\d+)(?:\.\d+)?-.*?,/si) {
+        # Ubuntu 10.04
+        # FFmpeg version SVN-r0.5.1-4:0.5.1-1ubuntu1, Copyright <<SNIP>> 
+                $self->{'ffmpeg_vers'} = $1;
+            }
             # Disabled unti I need the formatting again to detect wacky ffmpeg
             # versions if they go back to releasing things the old way.
             #elsif ($data =~ m/ffmpeg\sversion\s0.4.9-\d+_r(\d+)\.\w+\.at/si) {
