@@ -80,8 +80,11 @@
     elsif ($export_prog eq 'mencoder') {
         find_program('mencoder')
             or die "You need mencoder in order to use nuvexport in --mencoder mode\n";
-    # ffmpeg - seems to work better and is the default
+    # mencoder
         require export::mencoder::XviD;
+        require export::mencoder::H264MP3;
+        require export::mencoder::H264AAC;
+
     }
 
 # Load the other export modules
@@ -112,6 +115,8 @@
     }
     elsif ($export_prog eq 'mencoder') {
         push @Exporters, export::mencoder::XviD->new;
+        push @Exporters, export::mencoder::H264MP3->new;
+        push @Exporters, export::mencoder::H264AAC->new;
     }
     push @Exporters, export::NUV_SQL->new;
 

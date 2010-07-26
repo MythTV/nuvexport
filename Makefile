@@ -26,7 +26,9 @@ EXPORT_MODULES	  = export/generic.pm         \
 		    export/ffmpeg/VCD.pm      \
 		    export/ffmpeg/PSP.pm      \
 		    export/ffmpeg/MP4.pm      \
-		    export/mencoder/XviD.pm
+		    export/mencoder/XviD.pm   \
+		    export/mencoder/H264MP3.pm \
+                    export/mencoder/H264AAC.pm 
 MODULE_SUBDIRS    = transcode \
 		    ffmpeg    \
 		    mencoder

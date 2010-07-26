@@ -416,7 +416,7 @@
 
 </mencoder::XviD>
 
-<mencoder::X264>
+<mencoder::H264MP3>
 
     vbr          = yes   # Enable vbr to get the multipass/quantisation options
                          # (enabling multipass or quantisation automatically enables vbr)
@@ -429,7 +429,7 @@
     width        = 512   # Height adjusts automatically to width, according to aspect ratio
     height       = auto
 
-</mencoder::X264>
+</mencoder::H264MP3>
 
 
 ################################################################################

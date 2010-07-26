@@ -26,8 +26,34 @@ package export::mencoder;
     sub init_mencoder {
         my $self = shift;
     # Make sure we have mencoder
-        find_program('mencoder')
+        my $mencoder = find_program('mencoder')
             or push @{$self->{'errors'}}, 'You need mencoder to use this exporter.';
+
+    # Gather supported audio then video codecs
+        my $data = `$mencoder -oac help 2>&1`;
+        my ($codecs) = $data =~ /(?:^|\n\s*)Available\scodecs:\s*\n(.+?\n)\s*\n/s;
+        if ($codecs) {
+            while ($codecs =~ /^\s*(\S+)\b/mg) {
+                $self->{'codecs'}{$1} = 1;
+            }
+        }
+
+        $data = `$mencoder -ovc help 2>&1`;
+        ($codecs) = $data =~ /(?:^|\n\s*)Available\scodecs:\s*\n(.+?\n)\s*\n/s;
+
+        if ($codecs) {
+            while ($codecs =~ /^\s*(\S+)\b/mg) {
+                $self->{'codecs'}{$1} = 1;
+            }
+        }
+    }
+
+# Returns true or false for the requested codec
+    sub have_codec {
+        my $self  = shift;
+        my $codec = shift;
+        return 0 if (!exists $self->{'codecs'}{$codec});
+        return ($self->{'codecs'}{$codec});
     }
 
 # Load default settings

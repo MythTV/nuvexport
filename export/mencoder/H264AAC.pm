@@ -1,14 +1,14 @@
 #
-# $Date$
-# $Revision$
-# $Author$
+# $Date: 2008-02-16 20:16:13 -0500 (Sat, 16 Feb 2008) $
+# $Revision: 16098 $
+# $Author: xris $
 #
-#  export::mencoder::XviD
+#  export::mencoder::H264
 #  Copied from transcode.pm
 #  and modified by Ryan Dearing <mythtv@mythtv.us>
 #
 
-package export::mencoder::XviD;
+package export::mencoder::H264AAC;
     use base 'export::mencoder';
 
 # Load the myth and nuv utilities, and make sure we're connected to the database
@@ -26,8 +26,8 @@ package export::mencoder::XviD;
     sub new {
         my $class = shift;
         my $self  = {
-                     'cli'      => qr/\bxvid\b/i,
-                     'name'     => 'Export to XviD (using mencoder)',
+                     'cli'      => qr/\bh264-aac\b/i,
+                     'name'     => 'Export to H.264/AAC (using mencoder)',
                      'enabled'  => 1,
                      'errors'   => [],
                      'defaults' => {},
@@ -56,11 +56,11 @@ package export::mencoder::XviD;
         $self->init_mencoder();
 
     # Do we have libfaac support in mplayer?
-        if (!$self->have_codec('xvid')) {
-            push @{$self->{'errors'}}, "Your mencoder installation doesn't support XviD encoding.";
+        if (!$self->have_codec('x264')) {
+            push @{$self->{'errors'}}, "Your mencoder installation doesn't support encoding using libx264.";
         }
-        if (!$self->have_codec('mp3lame')) {
-            push @{$self->{'errors'}}, "Your mencoder installation doesn't support encoding using libmp3lame.";
+        if (!$self->have_codec('faac')) {
+            push @{$self->{'errors'}}, "Your mencoder installation doesn't support encoding using libfaac.";
         }
 
     # Any errors?  disable this function
@@ -86,38 +86,11 @@ package export::mencoder::XviD;
         $self->{'a_bitrate'} = query_text('Audio bitrate?',
                                           'int',
                                           $self->val('a_bitrate'));
-    # VBR options
-        if (!$is_cli) {
-            $self->{'vbr'} = query_text('Variable bitrate video?',
-                                        'yesno',
-                                        $self->val('vbr'));
-            if ($self->{'vbr'}) {
-                $self->{'multipass'} = query_text('Multi-pass (slower, but better quality)?',
-                                                  'yesno',
-                                                  $self->val('multipass'));
-                if (!$self->{'multipass'}) {
-                    while (1) {
-                        my $quantisation = query_text('VBR quality/quantisation (1-31)?', 'float', $self->val('quantisation'));
-                        if ($quantisation < 1) {
-                            print "Too low; please choose a number between 1 and 31.\n";
-                        }
-                        elsif ($quantisation > 31) {
-                            print "Too high; please choose a number between 1 and 31\n";
-                        }
-                        else {
-                            $self->{'quantisation'} = $quantisation;
-                            last;
-                        }
-                    }
-                }
-            }
-        # Ask the user what audio and video bitrates he/she wants
-            if ($self->{'multipass'} || !$self->{'vbr'}) {
-                $self->{'v_bitrate'} = query_text('Video bitrate?',
-                                                  'int',
-                                                  $self->val('v_bitrate'));
-            }
-        }
+    # Video Bitrate
+        $self->{'v_bitrate'} = query_text('Video bitrate?',
+                                          'int',
+                                          $self->val('v_bitrate'));                                          
+        
     # Query the resolution
         $self->query_resolution();
     }
@@ -126,45 +99,27 @@ package export::mencoder::XviD;
         my $self    = shift;
         my $episode = shift;
     # Build the mencoder string
-        my $params = " -ovc xvid -vf scale=$self->{'width'}:$self->{'height'}";
-       # unless ($episode->{'finfo'}{'fps'} =~ /^2(?:5|4\.9)/) {
-       #    $params .= " -J modfps=buffers=7 --export_fps 23.976";
-       # }
-    # Dual pass?
-        if ($self->{'multipass'}) {
+        my $params = " -vf scale=$self->{'width'}:$self->{'height'}";
         # Add the temporary file to the list
-            push @tmpfiles, "/tmp/xvid.$$.log";
+            push @tmpfiles, "/tmp/h264.$$.log";
         # Back up the path and use /dev/null for the first pass
             my $path_bak = $self->{'path'};
             $self->{'path'} = '/dev/null';
         # First pass
             print "First pass...\n";
             $self->{'mencoder_xtra'} = "  $params"
-                                       ." -passlogfile /tmp/xvid.$$.log"
+                                       ." -passlogfile /tmp/h264.$$.log"
                                        ." -oac copy"
-                                       ." -xvidencopts bitrate=$self->{'v_bitrate'}:pass=1:quant_type=mpeg:threads=2:keyframe_boost=10:kfthreshold=1:kfreduction=20 ";
+                                       ." -ovc x264 -x264encopts pass=1:bitrate=$self->{'v_bitrate'}:turbo=2:me=umh:me_range=24:dct_decimate:nointerlaced:no8x8dct:nofast_pskip:trellis=0:partitions=p8x8,b8x8,i4x4:mixed_refs:keyint=300:keyint_min=30:frameref=3:bframes=3:b_adapt:b_pyramid=none:weight_b:subq=7:chroma_me:nocabac:deblock:nossim:nopsnr:level_idc=31:threads=auto";
             $self->SUPER::export($episode, '', 1);
         # Restore the path
             $self->{'path'} = $path_bak;
         # Second pass
             print "Final pass...\n";
             $self->{'mencoder_xtra'} = " $params"
-                                       ." -oac mp3lame -lameopts vbr=3:br=$self->{'a_bitrate'}"
-                                       ." -passlogfile /tmp/xvid.$$.log"
-                                       ." -xvidencopts bitrate=$self->{'v_bitrate'}:pass=2:quant_type=mpeg:threads=2:keyframe_boost=10:kfthreshold=1:kfreduction=20 ";
-        }
-    # Single pass
-        else {
-            $self->{'mencoder_xtra'} = " $params"
-                                       ." -oac mp3lame -lameopts vbr=3:br=$self->{'a_bitrate'}";
-            if ($self->{'quantisation'}) {
-                $self->{'mencoder_xtra'} .= " -xvidencopts fixed_quant=".$self->{'quantisation'};
-            }
-            else {
-                $self->{'mencoder_xtra'} .= " -xvidencopts bitrate=$self->{'v_bitrate'} ";
-            }
-        }
-    # Execute the (final pass) encode
+                                       ." -oac faac -faacopts mpeg=4:br=$self->{'a_bitrate'}:object=2  " 
+                                       ." -passlogfile /tmp/h264.$$.log"
+                                       ." -ovc x264 -x264encopts pass=2:bitrate=$self->{'v_bitrate'}:me=umh:me_range=24:dct_decimate:nointerlaced:no8x8dct:nofast_pskip:trellis=0:partitions=p8x8,b8x8,i4x4:mixed_refs:keyint=300:keyint_min=30:frameref=3:bframes=3:b_adapt:b_pyramid=none:weight_b:subq=7:chroma_me:nocabac:deblock:nossim:nopsnr:level_idc=31:threads=auto";        
         $self->SUPER::export($episode, '.avi');
     }
 
