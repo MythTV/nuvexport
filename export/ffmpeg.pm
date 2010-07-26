@@ -72,8 +72,8 @@ package export::ffmpeg;
     # Check the ffmpeg version
         if (!defined $self->{'ffmpeg_vers'}) {
             $data = `$ffmpeg -version 2>&1`;
-            if ($data =~ m/ffmpeg\sversion\s0.5[\-,]/si) {
-                $self->{'ffmpeg_vers'} = '0.5';
+            if ($data =~ m/ffmpeg\sversion\s(0.\d)[\-,]/si) {
+                $self->{'ffmpeg_vers'} = $1;
             }
             elsif ($data =~ m/ffmpeg\sversion\sSVN-r(\d+),/si) {
                 $self->{'ffmpeg_vers'} = $1;
@@ -407,7 +407,7 @@ package export::ffmpeg;
                     }
                 }
             # ffmpeg warnings?
-                elsif ($l =~ /^Un(known|supported).+?(codec|format)/m) {
+                elsif ($l =~ /^Un(known|supported).+?(codec|format|(?:de|en)coder)/m) {
                     $warnings .= $l;
                     die "\n\nffmpeg had critical errors:\n\n$warnings";
                 }
