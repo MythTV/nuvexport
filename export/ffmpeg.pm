@@ -110,6 +110,10 @@ package export::ffmpeg;
         $data         = `$ffmpeg -formats 2>&1`;
         my ($formats) = $data =~ /(?:^|\n\s*)File\sformats:\s*\n(.+?\n)\s*\n/s;
         my ($codecs)  = $data =~ /(?:^|\n\s*)Codecs:\s*\n(.+?\n)\s*\n/s;
+        unless ($codecs) {
+            $data = `$ffmpeg -codecs 2>&1`;
+            ($codecs)  = $data =~ /(?:^|\n\s*)Codecs:\s*\n(.+?\n)\s*\n/s;
+        }
         if ($formats) {
             while ($formats =~ /^\s(..)\s(\S+)\b/mg) {
                 $self->{'formats'}{$2} = $1;
