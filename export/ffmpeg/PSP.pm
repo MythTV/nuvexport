@@ -44,7 +44,7 @@ package export::ffmpeg::PSP;
         if (!$self->can_encode('psp')) {
             push @{$self->{'errors'}}, "Your ffmpeg installation doesn't support encoding to psp video.";
         }
-        if (!$self->can_encode('aac') || !$self->can_encode('libfaac')) {
+        if (!$self->can_encode('aac') && !$self->can_encode('libfaac')) {
             push @{$self->{'errors'}}, "Your ffmpeg installation doesn't support encoding to aac audio.";
         }
     # Any errors?  disable this function
@@ -181,7 +181,7 @@ package export::ffmpeg::PSP;
             my $ffmpeg = find_program('ffmpeg')
                         or die("where is ffmpeg, we had it when we did an ffmpeg_init?");
 
-            $ffmpeg .= ' -y -i ' .shell_escape($self->get_outfile($episode, '.MP4'))
+            $ffmpeg .= ' -y -i ' .shell_escape($self->get_outfile($episode, '.MP4',1))
                       .' -s 160x90 -padtop 16 -padbottom 14 -r 1 -t 1'
                       .' -ss 7:00.00 -an -f mjpeg '
                       .shell_escape($self->get_outfile($episode, '.THM'));

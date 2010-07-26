@@ -408,13 +408,29 @@
 </ffmpeg::PSP>
 
 #
-# You can also add flags to the one and only mencoder option
+# You can also add flags to the mencoder option
 #
 <mencoder::XviD>
 
     multipass = no
 
 </mencoder::XviD>
+
+<mencoder::X264>
+
+    vbr          = yes   # Enable vbr to get the multipass/quantisation options
+                         # (enabling multipass or quantisation automatically enables vbr)
+    multipass    = yes   # You get either multipass or quantisation; multipass will override
+    quantisation = 6     # 4 through 6 is probably right...  1..31 are allowed (lower is better quality)
+
+    a_bitrate    = 128   # Audio bitrate of 128 kbps
+    v_bitrate    = 768   # Remember, quantisation overrides video bitrate
+
+    width        = 512   # Height adjusts automatically to width, according to aspect ratio
+    height       = auto
+
+</mencoder::X264>
+
 
 ################################################################################
 

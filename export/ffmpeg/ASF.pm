@@ -117,6 +117,8 @@ package export::ffmpeg::ASF;
     sub export {
         my $self    = shift;
         my $episode = shift;
+    # Disable multithreading, since msmpeg4 doesn't handle it!
+        $num_cpus = 1;
     # Make sure we have the framerate
         $self->{'out_fps'} = $episode->{'finfo'}{'fps'};
     # Dual pass?
@@ -130,7 +132,8 @@ package export::ffmpeg::ASF;
             print "First pass...\n";
             $self->{'ffmpeg_xtra'} = ' -vcodec msmpeg4'
                                    . $self->param('bit_rate', $self->{'v_bitrate'})
-                                   . ' -minrate 32 -maxrate '.(2*$self->{'v_bitrate'}).' -bt 32'
+                                   . $self->param('rc_max_rate', (2 * $self->{'v_bitrate'}))
+                                   . $self->param('bit_rate_tolerance', 32)
                                    . ' -bufsize 65535'
 #                                   . ' -lumi_mask 0.05 -dark_mask 0.02 -scplx_mask 0.7'
                                    . " -pass 1 -passlogfile '/tmp/asf.$$.log'"
@@ -141,8 +144,9 @@ package export::ffmpeg::ASF;
         # Second pass
             print "Final pass...\n";
             $self->{'ffmpeg_xtra'} = ' -vcodec msmpeg4'
-                                   . ' -b ' . $self->{'v_bitrate'}
-                                   . ' -minrate 32 -maxrate '.(2*$self->{'v_bitrate'}).' -bt 32'
+                                   . $self->param('bit_rate', $self->{'v_bitrate'})
+                                   . $self->param('rc_max_rate', (2 * $self->{'v_bitrate'}))
+                                   . $self->param('bit_rate_tolerance', 32)
                                    . ' -bufsize 65535'
 #                                   . ' -lumi_mask 0.05 -dark_mask 0.02 -scplx_mask 0.7'
                                    . ' -acodec '
@@ -154,15 +158,16 @@ package export::ffmpeg::ASF;
     # Single Pass
         else {
             $self->{'ffmpeg_xtra'} = ' -vcodec msmpeg4'
+                                   . $self->param('bit_rate', $self->{'v_bitrate'})
+                                   . $self->param('bit_rate_tolerance', 32)
                                    . ' -b ' . $self->{'v_bitrate'}
                                    . (($self->{'vbr'})
                                       ? " -qmin $self->{'quantisation'}"
                                       . ' -qmax 31 -minrate 32'
-                                      . ' -maxrate '.(2*$self->{'v_bitrate'})
-                                      . ' -bt 32 -bufsize 65535'
+                                      . $self->param('rc_max_rate', (2 * $self->{'v_bitrate'}))
+                                      . $self->param('bit_rate_tolerance', 32)
+                                      . ' -bufsize 65535'
                                       : '')
-#                                   . ' -lumi_mask 0.05 -dark_mask 0.02'
-#                                   . ' -scplx_mask 0.7'
                                    . ' -acodec '
                                    .($self->can_encode('libmp3lame') ? 'libmp3lame' : 'mp3')
                                    .' '.$self->param('ab', $self->{'a_bitrate'})

@@ -160,7 +160,7 @@ package export::ffmpeg;
         return param_pair('mblmax',         $value)     if ($param eq 'mb_lmax');
         return param_pair('mblmin',         $value)     if ($param eq 'mb_lmin');
         return param_pair('mepc',           $value)     if ($param eq 'me_penalty_compensation');
-        return param_pair('minrate',        $value)     if ($param eq 'rc_min_rate');
+        return param_pair('minrate',        $value.'k') if ($param eq 'rc_min_rate');
         return param_pair('qcomp',          $value)     if ($param eq 'qcompress');
         return param_pair('qdiff',          $value)     if ($param eq 'max_qdiff');
         return param_pair('qsquish',        $value)     if ($param eq 'rc_qsquish');

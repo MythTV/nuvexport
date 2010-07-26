@@ -89,7 +89,7 @@ package export::ffmpeg::MP3;
         my $safe_channel     = shell_escape($episode->{'callsign'}.', '.$episode->{'channame'});
         my $safe_description = shell_escape($episode->{'description'});
         my $safe_title       = shell_escape($episode->{'title'});
-        my $safe_outfile     = shell_escape($self->get_outfile($episode, '.mp3'));
+        my $safe_outfile     = shell_escape($self->get_outfile($episode, '.mp3',1));
         my $command = "id3tag -A $safe_subtitle -a $safe_channel -c $safe_description -s $safe_title $safe_outfile";
         system($command);
     }

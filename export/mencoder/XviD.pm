@@ -118,11 +118,7 @@ package export::mencoder::XviD;
         my $self    = shift;
         my $episode = shift;
     # Build the mencoder string
-        my $params = " -ovc xvid -vf scale=$self->{'width'}:$self->{'height'}"
-        #." -N 0x55" # make *sure* we're exporting mp3 audio
-
-        #." -oac mp3lame -lameopts vbr=3:br=$self->{'a_bitrate'}"
-                    ;
+        my $params = " -ovc xvid -vf scale=$self->{'width'}:$self->{'height'}";
        # unless ($episode->{'finfo'}{'fps'} =~ /^2(?:5|4\.9)/) {
        #    $params .= " -J modfps=buffers=7 --export_fps 23.976";
        # }
