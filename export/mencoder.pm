@@ -186,13 +186,18 @@ package export::mencoder;
         ($mencoder_pid, $mencoder_h) = fork_command("$mencoder 2>&1");
         $children{$mencoder_pid} = 'mencoder' if ($mencoder_pid);
     # Get ready to count the frames that have been processed
-        my ($frames, $fps);
+        my ($frames, $fps, $start, $total_frames);
         $frames = 0;
-        $fps    = 0.0;
-        my $total_frames = $episode->{'last_frame'} > 0
-                            ? $episode->{'last_frame'} - $episode->{'cutlist_frames'}
-                            : 0;
-    # Keep track of any warnings
+        $fps = 0.0;
+        $start = time();
+        $total_frames = 0;
+        if (!$episode->{'total_frames'} || $episode->{'total_frames'} < 1) {
+            $episode->{'total_frames'} = $episode->{'last_frame'} > 0
+                                       ? $episode->{'last_frame'} - $episode->{'cutlist_frames'}
+                                       : 0;
+        }
+ 
+     # Keep track of any warnings
         my $warnings    = '';
         my $death_timer = 0;
         my $last_death  = '';
@@ -208,7 +213,9 @@ package export::mencoder;
                 $pct = "0.00";
             }
             unless (arg('noprogress')) {
-                print "\rprocessed:  $frames of $total_frames frames ($pct\%), $fps fps ";
+                print "\rprocessed:  $frames of $total_frames frames, $fps fps ($pct\%, eta: ",
+                      $self->build_eta($frames, $total_frames, $fps), 
+                      ')  ';
             }
         # Read from the mencoder handle
             while (has_data($mencoder_h) and $l = <$mencoder_h>) {
