@@ -57,9 +57,6 @@
             or die "You need ffmpeg in order to use nuvexport in --ffmpeg mode\n";
     # ffmpeg - seems to work better and is the default
         require export::ffmpeg::XviD;
-        require export::ffmpeg::SVCD;
-        require export::ffmpeg::VCD;
-        require export::ffmpeg::DVCD;
         require export::ffmpeg::DVD;
         require export::ffmpeg::DivX;
         require export::ffmpeg::ASF;
@@ -86,9 +83,6 @@
 # Now that we've loaded the cli args, we can define the exporters
     if ($export_prog eq 'ffmpeg') {
         push @Exporters, export::ffmpeg::XviD->new;
-        push @Exporters, export::ffmpeg::SVCD->new;
-        push @Exporters, export::ffmpeg::VCD->new;
-        push @Exporters, export::ffmpeg::DVCD->new;
         push @Exporters, export::ffmpeg::DVD->new;
         push @Exporters, export::ffmpeg::DivX->new;
         push @Exporters, export::ffmpeg::ASF->new;

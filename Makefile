@@ -14,10 +14,7 @@ EXPORT_MODULES	  = export/generic.pm         \
 		    export/ffmpeg/DivX.pm     \
 		    export/ffmpeg/MP3.pm      \
 		    export/ffmpeg/ASF.pm      \
-		    export/ffmpeg/SVCD.pm     \
-		    export/ffmpeg/DVCD.pm     \
 		    export/ffmpeg/DVD.pm      \
-		    export/ffmpeg/VCD.pm      \
 		    export/ffmpeg/PSP.pm      \
 		    export/ffmpeg/MP4.pm      \
 		    export/mencoder/XviD.pm   \
