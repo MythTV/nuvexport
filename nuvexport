@@ -52,17 +52,7 @@
         or die "You need mythtranscode in order to use nuvexport.\n\n";
 
 # Load the exporters based on which suite was selected above
-    if ($export_prog eq 'transcode') {
-        find_program('transcode')
-            or die "You need transcode in order to use nuvexport in --transcode mode\n";
-    # transcode - doesn't seem to work for many MPEG recordings these days
-        require export::transcode::XviD;
-        require export::transcode::SVCD;
-        require export::transcode::VCD;
-        require export::transcode::DVCD;
-        require export::transcode::DVD;
-    }
-    elsif ($export_prog eq 'ffmpeg') {
+    if ($export_prog eq 'ffmpeg') {
         find_program('ffmpeg')
             or die "You need ffmpeg in order to use nuvexport in --ffmpeg mode\n";
     # ffmpeg - seems to work better and is the default
@@ -94,14 +84,7 @@
     load_cli_args();
 
 # Now that we've loaded the cli args, we can define the exporters
-    if ($export_prog eq 'transcode') {
-        push @Exporters, export::transcode::XviD->new;
-        push @Exporters, export::transcode::SVCD->new;
-        push @Exporters, export::transcode::VCD->new;
-        push @Exporters, export::transcode::DVCD->new;
-        push @Exporters, export::transcode::DVD->new;
-    }
-    elsif ($export_prog eq 'ffmpeg') {
+    if ($export_prog eq 'ffmpeg') {
         push @Exporters, export::ffmpeg::XviD->new;
         push @Exporters, export::ffmpeg::SVCD->new;
         push @Exporters, export::ffmpeg::VCD->new;

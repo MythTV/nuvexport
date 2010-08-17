@@ -8,14 +8,8 @@ CONF              = nuvexportrc
 
 EXPORT_MODULES	  = export/generic.pm         \
 		    export/ffmpeg.pm          \
-		    export/transcode.pm       \
 		    export/mencoder.pm        \
 		    export/NUV_SQL.pm         \
-		    export/transcode/DVCD.pm  \
-		    export/transcode/DVD.pm   \
-		    export/transcode/SVCD.pm  \
-		    export/transcode/VCD.pm   \
-		    export/transcode/XviD.pm  \
 		    export/ffmpeg/XviD.pm     \
 		    export/ffmpeg/DivX.pm     \
 		    export/ffmpeg/MP3.pm      \
@@ -29,8 +23,7 @@ EXPORT_MODULES	  = export/generic.pm         \
 		    export/mencoder/XviD.pm   \
 		    export/mencoder/H264MP3.pm \
                     export/mencoder/H264AAC.pm 
-MODULE_SUBDIRS    = transcode \
-		    ffmpeg    \
+MODULE_SUBDIRS    = ffmpeg    \
 		    mencoder
 MYTHTV_MODULES	  = mythtv/nuvinfo.pm \
 		    mythtv/recordings.pm

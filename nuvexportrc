@@ -19,9 +19,9 @@
 <nuvexport>
 
 #
-#  Set export_prog to ffmpeg, transcode or mencoder, depending on your
-#    preference of program for exports.  This is equivalent to --ffmpeg,
-#    --transcode or --mencoder
+#  Set export_prog to ffmpeg or mencoder, depending on your
+#    preference of program for exports.  This is equivalent to --ffmpeg or
+#    --mencoder
 #
     export_prog=ffmpeg
 
@@ -257,8 +257,8 @@
 #    matches in the full or generic module names.
 #
 #  If you have a particularly dirty signal, you might want to try to disable
-#    fast_denoise (it's actually part of yuvdenoise, which both the ffmpeg
-#    and transcode exporters call).  It can be almost twice as slow as the
+#    fast_denoise (it's actually part of yuvdenoise, which the ffmpeg
+#    exporters call).  It can be almost twice as slow as the
 #    default "fast" normal noise reduction, but it considerably more
 #    effective. The latest version of yuvdenoise (which is called directly
 #    by the ffmpeg exporters) does not support this option, so it is ignored
@@ -289,29 +289,6 @@
 #    deint_in_yuvdenoise = no
 #
 </ffmpeg>
-
-<transcode>
-
-#
-#  Mythtranscode will always be used for nupplevideo recordings because
-#    transcode can't read them, but setting force_mythtranscode to yes will
-#    force nuvexport to call mythtranscode when using the transcode exporter
-#    for mpeg recordings, too.  This may help problems that some people have
-#    been having with transcode not recognizing certain dvb recordings, as
-#    well as transcode not working properly on certain ivtv recordings.
-#
-    force_mythtranscode = yes
-
-#
-#  Setting both force_mythtranscode and mythtranscode_cutlist to yes will
-#    tell nuvexport to use mythtranscode's built-in cutlist functions,
-#    rather than having transcode use its own.  I've found that the cutlists
-#    for a handful of ivtv recordings that do not work properly with
-#    transcode's internal cutlist handler.
-#
-    mythtranscode_cutlist = yes
-
-</transcode>
 
 <mencoder>
 </mencoder>
@@ -446,7 +423,7 @@
 
     title       = test
 
-    export_prog = transcode
+    export_prog = ffmpeg
     mode        = xvid
     confirm     = true
 

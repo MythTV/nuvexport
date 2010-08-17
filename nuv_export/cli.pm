@@ -39,11 +39,10 @@ package nuv_export::cli;
     my %args;
 
 # Load some options early, before anything else:
-# --ffmpeg, --transcode and --config
+# --ffmpeg, --mencoder and --config
     our $export_prog = undef;
     our $config_file = undef;
     GetOptions('ffmpeg'     => sub { $export_prog = 'ffmpeg';    },
-               'transcode'  => sub { $export_prog = 'transcode'; },
                'mencoder'   => sub { $export_prog = 'mencoder';  },
                'config|c=s' => \$config_file,
                'profile=s'  => \$args{'profile'},
@@ -114,7 +113,7 @@ package nuv_export::cli;
             $export_prog = lc($rc_args{'nuvexport'}{'export_prog'});
         }
         if ($export_prog) {
-            if ($export_prog !~ /(?:ffmpeg|transcode|mencoder)$/) {
+            if ($export_prog !~ /(?:ffmpeg|mencoder)$/) {
                 print "Unknown export_prog in nuvexportrc:  $export_prog\n\n";
                 exit;
             }
@@ -122,9 +121,7 @@ package nuv_export::cli;
         else {
             $export_prog = find_program('ffmpeg')
                             ? 'ffmpeg'
-                            : find_program('transcode')
-                                ? 'transcode'
-                                : 'mencoder';
+                            : 'mencoder';
         }
     }
 
