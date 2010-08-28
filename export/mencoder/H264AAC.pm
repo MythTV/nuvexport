@@ -1,7 +1,7 @@
 #
-# $Date: 2008-02-16 20:16:13 -0500 (Sat, 16 Feb 2008) $
-# $Revision: 16098 $
-# $Author: xris $
+# $Date$
+# $Revision$
+# $Author$
 #
 #  export::mencoder::H264
 #  Copied from transcode.pm
