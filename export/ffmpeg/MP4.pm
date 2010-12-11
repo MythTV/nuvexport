@@ -64,7 +64,7 @@ package export::ffmpeg::MP4;
         $self->init_ffmpeg();
 
     # Can we even encode mp4?
-        if (!$self->can_encode('mp4')) {
+        if (!$self->can_encode_format('mp4')) {
             push @{$self->{'errors'}}, "Your ffmpeg installation doesn't support encoding to mp4 file formats.";
         }
         if (!$self->can_encode('aac') && !$self->can_encode('libfaac')) {

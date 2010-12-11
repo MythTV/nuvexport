@@ -41,7 +41,7 @@ package export::ffmpeg::PSP;
         $self->init_ffmpeg();
 
     # Can we even encode psp?
-        if (!$self->can_encode('psp')) {
+        if (!$self->can_encode_format('psp')) {
             push @{$self->{'errors'}}, "Your ffmpeg installation doesn't support encoding to psp video.";
         }
         if (!$self->can_encode('aac') && !$self->can_encode('libfaac')) {

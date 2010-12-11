@@ -42,8 +42,8 @@ package export::ffmpeg;
     # Temp var
         my $data;
     # Make sure we have ffmpeg
-        my $ffmpeg = find_program('ffmpeg')
-            or push @{$self->{'errors'}}, 'You need ffmpeg to use this exporter.';
+        my $ffmpeg = find_program('mythffmpeg')
+            or push @{$self->{'errors'}}, 'You need mythffmpeg to use this exporter.';
     # Make sure we have yuvdenoise
         my $yuvdenoise = find_program('yuvdenoise')
             or push @{$self->{'errors'}}, 'You need yuvdenoise (part of mjpegtools) to use this exporter.';
@@ -69,56 +69,19 @@ package export::ffmpeg;
                 $self->{'deint_in_yuvdenoise'} = 0;
             }
         }
-    # Check the ffmpeg version
-        if (!defined $self->{'ffmpeg_vers'}) {
-            $data = `$ffmpeg -version 2>&1`;
-            if ($data =~ m/ffmpeg\sversion\s(0.\d)[\-,]/si) {
-                $self->{'ffmpeg_vers'} = $1;
-            }
-            elsif ($data =~ m/ffmpeg\sversion\sSVN-r(\d+),/si) {
-                $self->{'ffmpeg_vers'} = $1;
-            }
-            elsif ($data =~ m/ffmpeg\sversion\sSVN-r(\d+\.\d+)(?:\.\d+)?-.*?,/si) {
-        # Ubuntu 10.04
-        # FFmpeg version SVN-r0.5.1-4:0.5.1-1ubuntu1, Copyright <<SNIP>> 
-                $self->{'ffmpeg_vers'} = $1;
-            }
-            # Disabled unti I need the formatting again to detect wacky ffmpeg
-            # versions if they go back to releasing things the old way.
-            #elsif ($data =~ m/ffmpeg\sversion\s0.4.9-\d+_r(\d+)\.\w+\.at/si) {
-            #    $self->{'ffmpeg_vers'}  = 'svn';
-            #    $self->{'ffmpeg_build'} = $1;
-            #}
-            #elsif ($data =~ m/ffmpeg\sversion\s(.+?),(?:\sbuild\s(\d+))?/si) {
-            #    $self->{'ffmpeg_vers'}  = lc($1);
-            #    $self->{'ffmpeg_build'} = $2;
-            #    if ($self->{'ffmpeg_vers'} =~ /^svn-r(.+?)$/) {
-            #        $self->{'ffmpeg_vers'}  = 'svn';
-            #        $self->{'ffmpeg_build'} = $1;
-            #    }
-            #}
-            else {
-                push @{$self->{'errors'}}, 'Unrecognizeable ffmpeg version string.';
-            }
-        }
-        if ($self->{'ffmpeg_vers'} < 0.5) {
-            push @{$self->{'errors'}}, "This version of nuvexport requires ffmpeg 0.5.\n";
-        }
     # Audio only?
         $self->{'audioonly'} = $audioonly;
     # Gather the supported codecs
         $data         = `$ffmpeg -formats 2>&1`;
-        my ($formats) = $data =~ /(?:^|\n\s*)File\sformats:\s*\n(.+?\n)\s*\n/s;
-        my ($codecs)  = $data =~ /(?:^|\n\s*)Codecs:\s*\n(.+?\n)\s*\n/s;
-        unless ($codecs) {
-            $data = `$ffmpeg -codecs 2>&1`;
-            ($codecs)  = $data =~ /(?:^|\n\s*)Codecs:\s*\n(.+?\n)\s*\n/s;
-        }
+        my ($formats) = $data =~ /(?:^|\n\s*)File\sformats:\s*\n(.+\n)/s;
         if ($formats) {
             while ($formats =~ /^\s(..)\s(\S+)\b/mg) {
                 $self->{'formats'}{$2} = $1;
             }
         }
+
+        $data = `$ffmpeg -codecs 2>&1`;
+        my ($codecs)  = $data =~ /(?:^|\n\s*)Codecs:\s*\n(.+?\n)\s*\n/s;
         if ($codecs) {
             while ($codecs =~ /^\s(.{6})\s(\S+)\b/mg) {
                 $self->{'codecs'}{$2} = $1;
@@ -133,11 +96,19 @@ package export::ffmpeg;
         return ($self->{'codecs'}{$codec} && $self->{'codecs'}{$codec} =~ /^D/
                 || $self->{'formats'}{$codec} && $self->{'formats'}{$codec} =~ /^D/) ? 1 : 0;
     }
+
     sub can_encode {
         my $self  = shift;
         my $codec = shift;
-        return ($self->{'codecs'}{$codec} && $self->{'codecs'}{$codec} =~ /^.E/
-                || $self->{'formats'}{$codec} && $self->{'formats'}{$codec} =~ /^.E/) ? 1 : 0;
+        return ($self->{'codecs'}{$codec} && $self->{'codecs'}{$codec} =~ /^.E/)
+               ? 1 : 0;
+    }
+
+    sub can_encode_format {
+        my $self  = shift;
+        my $codec = shift;
+        return ($self->{'formats'}{$codec} && $self->{'formats'}{$codec} =~ /^.E/)
+               ? 1 : 0;
     }
 
 # ffmpeg keeps changing their parameter names... so we work around it.
