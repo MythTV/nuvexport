@@ -337,18 +337,6 @@
 <ffmpeg::MP4>
 
 #
-#  Codec to use (mpeg4 or h264).  Please note that h264 support requires the
-#    SVN version of ffmpeg (not CVS!).  In fact, even the mpeg4 codec works
-#    better with the SVN version.
-#
-#    Note:  The h.264 files exported by nuvexport seem to play fine on
-#    ipods, but lack the atom necessary to be recognized by iTunes, so you
-#    will have to find other means to get the exports onto your ipod (gtkpod
-#    works great).
-#
-    mp4_codec = h264
-
-#
 #  Framerate to use:  auto, 25, 23.97, 29.97.  PAL will always be 25 fps,
 #    and auto will set 29.97 for everything over 320x288 and 23.97 for the
 #    rest.

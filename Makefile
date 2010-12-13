@@ -17,6 +17,7 @@ EXPORT_MODULES	  = export/generic.pm         \
 		    export/ffmpeg/DVD.pm      \
 		    export/ffmpeg/PSP.pm      \
 		    export/ffmpeg/MP4.pm      \
+		    export/ffmpeg/H264.pm     \
 		    export/mencoder/XviD.pm   \
 		    export/mencoder/H264MP3.pm \
                     export/mencoder/H264AAC.pm 

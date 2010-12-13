@@ -79,6 +79,7 @@ package export::ffmpeg::MP3;
         my $episode = shift;
     # Build the ffmpeg string
         $self->{'ffmpeg_xtra'} = $self->param('ab', $self->val('bitrate'))
+                                .$self->param('ac', 2)
                                 .' -acodec '
                                 .($self->can_encode('libmp3lame') ? 'libmp3lame' : 'mp3')
                                 .' -f mp3';

@@ -53,8 +53,8 @@
 
 # Load the exporters based on which suite was selected above
     if ($export_prog eq 'ffmpeg') {
-        find_program('ffmpeg')
-            or die "You need ffmpeg in order to use nuvexport in --ffmpeg mode\n";
+        find_program('mythffmpeg')
+            or die "You need mythffmpeg in order to use nuvexport in --ffmpeg mode\n";
     # ffmpeg - seems to work better and is the default
         require export::ffmpeg::XviD;
         require export::ffmpeg::DVD;
@@ -63,6 +63,7 @@
         require export::ffmpeg::MP3;
         require export::ffmpeg::PSP;
         require export::ffmpeg::MP4;
+        require export::ffmpeg::H264;
     }
     elsif ($export_prog eq 'mencoder') {
         find_program('mencoder')
@@ -89,6 +90,7 @@
         push @Exporters, export::ffmpeg::MP3->new;
         push @Exporters, export::ffmpeg::PSP->new;
         push @Exporters, export::ffmpeg::MP4->new;
+        push @Exporters, export::ffmpeg::H264->new;
     }
     elsif ($export_prog eq 'mencoder') {
         push @Exporters, export::mencoder::XviD->new;

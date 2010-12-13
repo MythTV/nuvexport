@@ -172,19 +172,22 @@ package export::ffmpeg::PSP;
                                  .' -bufsize 65535'
                                  .$self->param('ab', 32)
                                  .' -acodec '.$acodec
+                                 .' -strict experimental' if ($acodec eq "aac")
                                  ." -f psp";
     # Execute the parent method
         $self->SUPER::export($episode, '.MP4');
 
     # Make the thumbnail if needed
         if ($self->{'psp_thumbnail'}) {
-            my $ffmpeg = find_program('ffmpeg')
-                        or die("where is ffmpeg, we had it when we did an ffmpeg_init?");
+            my $ffmpeg = find_program('mythffmpeg')
+                        or die("where is mythffmpeg, we had it when we did an ffmpeg_init?");
 
-            $ffmpeg .= ' -y -i ' .shell_escape($self->get_outfile($episode, '.MP4',1))
-                      .' -s 160x90 -padtop 16 -padbottom 14 -r 1 -t 1'
-                      .' -ss 7:00.00 -an -f mjpeg '
-                      .shell_escape($self->get_outfile($episode, '.THM'));
+            $ffmpeg .= ' -y -i ' 
+                    .shell_escape($self->get_outfile($episode, '.MP4',1))
+                    .' -ss 420 -vframes 1'
+                    .' -vf scale=160:90,pad=160:120:0:16:black'
+                    .' -an -f mjpeg '
+                    .shell_escape($self->get_outfile($episode, '.THM'));
             `$ffmpeg` unless ($DEBUG);
 
             if ($DEBUG) {

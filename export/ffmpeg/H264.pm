@@ -1,13 +1,13 @@
 # vim:ts=4:sw=4:ai:et:si:sts=4
 #
-# ffmpeg-based MP4 (iPod) video module for nuvexport.
+# ffmpeg-based H.264 (iPod) video module for nuvexport.
 #
 # Many thanks to cartman in #ffmpeg, and for the instructions at
 # http://rob.opendot.cl/index.php?active=3&subactive=1
 # http://videotranscoding.wikispaces.com/EncodeForIPodorPSP
 #
 
-package export::ffmpeg::MP4;
+package export::ffmpeg::H264;
     use base 'export::ffmpeg';
 
 # Load the myth and nuv utilities, and make sure we're connected to the database
@@ -27,8 +27,8 @@ package export::ffmpeg::MP4;
     sub new {
         my $class = shift;
         my $self  = {
-                     'cli'      => qr/\b(?:mp4|ipod)\b/i,
-                     'name'     => 'Export to MP4 (iPod)',
+                     'cli'      => qr/\b(?:h264|ipodh264)\b/i,
+                     'name'     => 'Export to H.264 (including iPod)',
                      'enabled'  => 1,
                      'errors'   => [],
                      'defaults' => {},
@@ -63,8 +63,8 @@ package export::ffmpeg::MP4;
         if (!$self->can_encode('aac') && !$self->can_encode('libfaac')) {
             push @{$self->{'errors'}}, "Your ffmpeg installation doesn't support encoding to aac audio.";
         }
-        if (!$self->can_encode('mpeg4')) {
-            push @{$self->{'errors'}}, "Your ffmpeg installation doesn't support encoding to mpeg4 video.";
+        if (!$self->can_encode('libx264')) {
+            push @{$self->{'errors'}}, "Your ffmpeg installation doesn't support encoding to h264 video.";
         }
     # Any errors?  disable this function
         $self->{'enabled'} = 0 if ($self->{'errors'} && @{$self->{'errors'}} > 0);
@@ -81,7 +81,6 @@ package export::ffmpeg::MP4;
         $self->{'defaults'}{'v_bitrate'}  = 384;
         $self->{'defaults'}{'a_bitrate'}  = 64;
         $self->{'defaults'}{'width'}      = 320;
-    # Verify commandline options
     }
 
 # Gather settings from the user
@@ -159,7 +158,7 @@ package export::ffmpeg::MP4;
         if (!defined $self->val('mp4_fps')) {
             $self->{'mp4_fps'} = "auto";
         }
-            
+
         if ($standard eq 'PAL') {
             $self->{'out_fps'} = 25;
         }
@@ -178,7 +177,8 @@ package export::ffmpeg::MP4;
             $safe_title .= ' - '.$episode->{'subtitle'};
         }
         my $safe_title = shell_escape($safe_title);
-        my $codec = 'mpeg4';
+    # Codec name changes between ffmpeg versions
+        my $codec = 'libx264';
 
     # Build the common ffmpeg string
         my $ffmpeg_xtra  =
@@ -186,10 +186,18 @@ package export::ffmpeg::MP4;
             .$self->param('bit_rate', $self->{'v_bitrate'})
             ;
     # Options required for the codecs separately
-        $ffmpeg_xtra .= ' -flags +mv4+loop+aic'
-                       .' -trellis 1'
-                       .' -mbd 1'
-                       .' -cmp 2 -subcmp 2'
+        $ffmpeg_xtra .= ' -level 30'
+                       .' -flags loop+slice'
+                       .' -g 250 -keyint_min 25'
+                       .' -sc_threshold 40'
+                       .' -rc_eq \'blurCplx^(1-qComp)\''
+                       .$self->param('bit_rate_tolerance', $self->{'v_bitrate'})
+                       .$self->param('rc_max_rate',        1500 - $self->{'a_bitrate'})
+                       .$self->param('rc_buffer_size',     2000)
+                       .$self->param('i_quant_factor',     0.71428572)
+                       .$self->param('b_quant_factor',     0.76923078)
+                       .$self->param('max_b_frames',       0)
+                       .' -me_method umh'
                        ;
     # Some shared options
         if ($self->{'multipass'} || $self->{'vbr'}) {
@@ -200,13 +208,25 @@ package export::ffmpeg::MP4;
         }
     # Dual pass?
         if ($self->{'multipass'}) {
+        # Apparently, the -passlogfile option doesn't work for h264, so we need
+        # to be aware of other processes that might be working in this directory
+            if (-e 'x264_2pass.log.temp' || -e 'x264_2pass.log') {
+                die "ffmpeg does not allow us to specify the name of the multi-pass log\n"
+                   ."file, and x264_2pass.log exists in this directory already.  Please\n"
+                   ."wait for the other process to finish, or remove the stale file.\n";
+            }
         # Add all possible temporary files to the list
-            push @tmpfiles, 'ffmpeg2pass-0.log';
+            push @tmpfiles, 'x264_2pass.log',
+                            'x264_2pass.log.temp',
+                            'x264_2pass.log.mbtree';
         # Build the ffmpeg string
             print "First pass...\n";
             $self->{'ffmpeg_xtra'} = ' -pass 1'
                                     .$ffmpeg_xtra
-                                    .' -f mp4';
+                                    .' -f mp4'
+                                    .' -refs 1 -subq 1'
+                                    .' -trellis 0'
+                                    ;
             $self->SUPER::export($episode, '', 1);
         # Second Pass
             print "Final pass...\n";
@@ -219,6 +239,17 @@ package export::ffmpeg::MP4;
                 $ffmpeg_xtra .= ' -qmin '.$self->{'quantisation'};
             }
         }
+    # Single/final pass options
+        $ffmpeg_xtra .= ' -refs '.($self->val('ipod') ? 2 : 7)
+                       .' -subq 7'
+                       .' -partitions parti4x4+parti8x8+partp4x4+partp8x8+partb8x8'
+                       .' -flags2 +bpyramid+wpred+mixed_refs+dct8x8'
+                       .' -me_range 21'
+                       .' -trellis 2'
+                       .' -cmp 1'
+                       # These should match the defaults:
+                       .' -deblockalpha 0 -deblockbeta 0'
+                       ;
     # Audio codec name changes between ffmpeg versions
         my $acodec = $self->can_encode('libfaac') ? 'libfaac' : 'aac';
     # Don't forget the audio, etc.

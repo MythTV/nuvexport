@@ -47,6 +47,9 @@ package export::ffmpeg;
     # Make sure we have yuvdenoise
         my $yuvdenoise = find_program('yuvdenoise')
             or push @{$self->{'errors'}}, 'You need yuvdenoise (part of mjpegtools) to use this exporter.';
+    # Make sure we have sox
+        my $sox = find_program('sox')
+            or push @{$self->{'errors'}}, 'You need sox to use this exporter.';
     # Check the yuvdenoise version
         if (!defined $self->{'denoise_vmaj'}) {
             $data = `cat /dev/null | yuvdenoise 2>&1`;
@@ -191,23 +194,28 @@ package export::ffmpeg;
         $mythtranscode .= ' --honorcutlist' if ($self->{'use_cutlist'});
         $mythtranscode .= ' --fifosync'     if ($self->{'audioonly'} || $firstpass);
 
+        my $audiofifo = "/tmp/fifodir_$$/audout";
         my $videofifo = "/tmp/fifodir_$$/vidout";
         my $videotype = 'rawvideo -pix_fmt yuv420p';
         my $crop_w;
         my $crop_h;
         my $pad_w;
         my $pad_h;
+        my $scale_w;
+        my $scale_h;
         my $height;
         my $width;
+        my @filters;
+        my $sox;
 
     # Standard encodes
         if (!$self->{'audioonly'}) {
         # Do noise reduction -- ffmpeg's -nr flag doesn't seem to do anything other than prevent denoise from working
             if ($self->{'noise_reduction'}) {
-                $ffmpeg .= "$NICE ffmpeg -f rawvideo";
+                $ffmpeg .= "$NICE mythffmpeg -f rawvideo";
                 $ffmpeg .= ' -s ' . $episode->{'finfo'}{'width'} . 'x' . $episode->{'finfo'}{'height'};
                 $ffmpeg .= ' -r ' . $episode->{'finfo'}{'fps'};
-                $ffmpeg .= " -i /tmp/fifodir_$$/vidout -f yuv4mpegpipe -";
+                $ffmpeg .= " -i $videofifo -f yuv4mpegpipe -";
                 $ffmpeg .= ' 2> /dev/null | ';
                 $ffmpeg .= "$NICE yuvdenoise";
                 if ($self->{'denoise_vmaj'} < 1.6 || ($self->{'denoise_vmaj'} == 1.6 && $self->{'denoise_vmin'} < 3)) {
@@ -226,16 +234,33 @@ package export::ffmpeg;
             }
         }
 
+    # If we have 6-channel audio, and want 2-channel, we need to use sox as
+    # ffmpeg is retarded and won't/can't do it
+        if ((!$firstpass || $self->{'audioonly'}) &&
+            $episode->{'finfo'}{'audio_channels'} > 2) {
+            my $newaudiofifo = "/tmp/fifodir_$$/audout2";
+            $sox = "$NICE sox --single-threaded -t raw -e signed -2" 
+                 . " -c " . $episode->{'finfo'}{'audio_channels'} 
+                 . " -r " . $episode->{'finfo'}{'audio_sample_rate'}
+                 . " $audiofifo -t raw -e signed -2 -c 2"
+                 . " -r " . $episode->{'finfo'}{'audio_sample_rate'}
+                 . " $newaudiofifo"
+                 . " remix -m 1,4v0.5,2v0.7 3,5v0.5,2v0.7";
+            $audiofifo = $newaudiofifo;
+        }
+
     # Start the ffmpeg command
-        $ffmpeg .= "$NICE ffmpeg";
+        $ffmpeg .= "$NICE mythffmpeg";
         if ($num_cpus > 1) {
             $ffmpeg .= ' -threads '.($num_cpus);
         }
-        $ffmpeg .= ' -y -f '.($Config{'byteorder'} == 4321 ? 's16be' : 's16le')
-                  .' -ar ' . $episode->{'finfo'}{'audio_sample_rate'}
-                  .' -ac ' . $episode->{'finfo'}{'audio_channels'};
+        $ffmpeg .= ' -y';
         if (!$firstpass) {
-            $ffmpeg .= " -i /tmp/fifodir_$$/audout";
+        $ffmpeg  .=' -f '.($Config{'byteorder'} == 4321 ? 's16be' : 's16le')
+                  .' -ar ' . $episode->{'finfo'}{'audio_sample_rate'}
+#                  .' -ac ' . $episode->{'finfo'}{'audio_channels'};
+                  .' -ac 2';
+            $ffmpeg .= " -i $audiofifo";
         }
         if (!$self->{'audioonly'}) {
             $ffmpeg .= " -f $videotype"
@@ -245,6 +270,9 @@ package export::ffmpeg;
                       ." -i $videofifo";
 
             $self->{'out_aspect'} ||= $episode->{'finfo'}{'aspect_f'};
+
+            $ffmpeg .= ' -aspect ' . $self->{'out_aspect'}
+                      .' -r '      . $self->{'out_fps'};
 
         # The output is actually a stretched/anamorphic aspect ratio
         # (like 480x480 for SVCD, which is 4:3)
@@ -274,8 +302,8 @@ package export::ffmpeg;
                 }
             }
 
-            $ffmpeg .= ' -aspect ' . $self->{'out_aspect'}
-                      .' -r '      . $self->{'out_fps'};
+            $scale_w = $width  - (2 * $pad_w);
+            $scale_h = $height - (2 * $pad_h);
 
         # Deinterlace in ffmpeg only if the user wants to
             if ($self->val('deinterlace') && !($self->val('noise_reduction') && $self->val('deint_in_yuvdenoise'))) {
@@ -293,22 +321,24 @@ package export::ffmpeg;
                 $b-- if ($b > 0 && $b % 2);
                 $l-- if ($l > 0 && $l % 2);
             # crop
-                $ffmpeg .= " -croptop    $t -cropright $r"
-                          ." -cropbottom $b -cropleft  $l" if ($t || $r || $b || $l);
+                $crop_w = $episode->{'finfo'}{'width'}  - $r - $l;
+                $crop_h = $episode->{'finfo'}{'height'} - $b - $t; 
+                push @filters, "crop=$l:$t:$crop_w:$crop_h" if ($t || $r || $b || $l);
             }
 
         # Letter/Pillarboxing as appropriate
-            if ($pad_h) {
-                $ffmpeg .= " -padtop $pad_h -padbottom $pad_h";
-            }
-            if ($pad_w) {
-                $ffmpeg .= " -padleft $pad_w -padright $pad_w";
-            }
-            $ffmpeg .= " -s ${width}x$height";
+            push @filters, "scale=$scale_w:$scale_h";
+            push @filters, "pad=$width:$height:$pad_w:$pad_h:black" if ($pad_h | $pad_w);
+            push @filters, "pixelaspect=1";
+            push @filters, "slicify";
+
+        # Add in the filters
+            $ffmpeg .= " -vf " . join(",", @filters) if ($#filters != -1);
         }
 
     # Add any additional settings from the child module
         $ffmpeg .= ' '.$self->{'ffmpeg_xtra'};
+
 
     # Output directory set to null means the first pass of a multipass
         if ($firstpass || !$self->{'path'} || $self->{'path'} =~ /^\/dev\/null\b/) {
@@ -319,7 +349,8 @@ package export::ffmpeg;
             $ffmpeg .= ' '.shell_escape($self->get_outfile($episode, $suffix));
         }
     # ffmpeg pids
-        my ($mythtrans_pid, $ffmpeg_pid, $mythtrans_h, $ffmpeg_h);
+        my ($mythtrans_pid, $sox_pid, $ffmpeg_pid, $mythtrans_h, $sox_h, 
+            $ffmpeg_h);
 
     # Create a directory for mythtranscode's fifo's
         mkdir("/tmp/fifodir_$$/", 0755) or die "Can't create /tmp/fifodir_$$/:  $!\n\n";
@@ -327,6 +358,15 @@ package export::ffmpeg;
         $children{$mythtrans_pid} = 'mythtranscode' if ($mythtrans_pid);
         fifos_wait("/tmp/fifodir_$$/", $mythtrans_pid, $mythtrans_h);
         push @tmpfiles, "/tmp/fifodir_$$", "/tmp/fifodir_$$/audout", "/tmp/fifodir_$$/vidout";
+
+    # Run sox if needed
+        if ((!$firstpass || $self->{'audioonly'}) &&
+            ($episode->{'finfo'}{'audio_channels'} > 2)) {
+            POSIX::mkfifo( "/tmp/fifodir_$$/audout2", 0644 );
+            push @tmpfiles, "/tmp/fifodir_$$/audout2";
+            ($sox_pid, $sox_h) = fork_command("$sox 2>&1");
+            $children{$sox_pid} = 'sox' if ($sox_pid);
+        }
 
     # For multipass encodes, we don't need the audio on the first pass
         if ($self->{'audioonly'}) {
