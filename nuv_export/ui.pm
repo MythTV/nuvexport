@@ -249,6 +249,8 @@ package nuv_export::ui;
             $query .= "$episode->{'subtitle'} " if ($episode->{'subtitle'} && $episode->{'subtitle'} ne 'Untitled');
             $query .= "($episode->{'showtime'}) ".$episode->{'finfo'}{'width'}.'x'.$episode->{'finfo'}->{'height'}
                      .' '.$episode->{'finfo'}{'video_type'}.' ('.$episode->{'finfo'}{'aspect'}.')';
+            $query .= ' '.$episode->{'finfo'}{'audio_channels'}.'ch';
+            $query .= '-'.$episode->{'finfo'}{'audio_type'} if $episode->{'finfo'}{'audio_type'};
             $query .= wrap($episode->{'description'}, 80, $newline, '', $newline) if ($episode->{'description'});
             $query .= "\n";
             $episode_choices[$count-1] = $episode;
