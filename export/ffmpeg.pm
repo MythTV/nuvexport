@@ -187,10 +187,10 @@ package export::ffmpeg;
     # Here, we have to fork off a copy of mythtranscode (Do not use --fifosync with ffmpeg or it will hang)
         my $mythtranscode_bin = find_program('mythtranscode');
         $mythtranscode = "$NICE $mythtranscode_bin --showprogress"
-                        ." -p '$episode->{'transcoder'}'"
-                        ." -c '$episode->{'chanid'}'"
-                        ." -s '".unix_to_myth_time($episode->{'recstartts'})."'"
-                        ." -f \"/tmp/fifodir_$$/\"";
+                        ." --profile '$episode->{'transcoder'}'"
+                        ." --chanid '$episode->{'chanid'}'"
+                        ." --starttime '".unix_to_myth_time($episode->{'recstartts'})."'"
+                        ." --fifodir \"/tmp/fifodir_$$/\"";
         $mythtranscode .= ' --honorcutlist' if ($self->{'use_cutlist'});
         $mythtranscode .= ' --fifosync'     if ($self->{'audioonly'} || $firstpass);
 
@@ -309,6 +309,9 @@ package export::ffmpeg;
             if ($self->val('deinterlace') && !($self->val('noise_reduction') && $self->val('deint_in_yuvdenoise'))) {
                 $ffmpeg .= ' -deinterlace';
             }
+        # Slicify should be early on in the filters to allow for better cache
+        # use in ffmpeg
+            push @filters, "slicify";
         # Crop
             if ($self->{'crop'}) {
                 my $t = sprintf('%.0f', ($self->val('crop_top')    / 100) * $episode->{'finfo'}{'height'});
@@ -329,8 +332,7 @@ package export::ffmpeg;
         # Letter/Pillarboxing as appropriate
             push @filters, "scale=$scale_w:$scale_h";
             push @filters, "pad=$width:$height:$pad_w:$pad_h:black" if ($pad_h | $pad_w);
-            push @filters, "pixelaspect=1";
-            push @filters, "slicify";
+            push @filters, "setsar=1";
 
         # Add in the filters
             $ffmpeg .= " -vf " . join(",", @filters) if ($#filters != -1);
