@@ -326,7 +326,7 @@ package export::ffmpeg;
             # crop
                 $crop_w = $episode->{'finfo'}{'width'}  - $r - $l;
                 $crop_h = $episode->{'finfo'}{'height'} - $b - $t; 
-                push @filters, "crop=$l:$t:$crop_w:$crop_h" if ($t || $r || $b || $l);
+                push @filters, "crop=$crop_w:$crop_h:$l:$t" if ($t || $r || $b || $l);
             }
 
         # Letter/Pillarboxing as appropriate
