@@ -13,7 +13,6 @@ package mythtv::recordings;
     use DBI;
     use nuv_export::shared_utils;
     use nuv_export::cli;
-    use mythtv::nuvinfo;
     use Date::Manip;
 
     BEGIN {

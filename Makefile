@@ -23,8 +23,7 @@ EXPORT_MODULES	  = export/generic.pm         \
                     export/mencoder/H264AAC.pm 
 MODULE_SUBDIRS    = ffmpeg    \
 		    mencoder
-MYTHTV_MODULES	  = mythtv/nuvinfo.pm \
-		    mythtv/recordings.pm
+MYTHTV_MODULES	  = mythtv/recordings.pm
 NUVEXPORT_MODULES = nuv_export/help.pm         \
 		    nuv_export/shared_utils.pm \
 		    nuv_export/task.pm         \
