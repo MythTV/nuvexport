@@ -162,12 +162,12 @@
             if ($DEBUG) {
                 print "\n--------------------------------",
                       "\nTo encode:  ", $episode->{'title'};
-                print ':  ', $episode->{'subtitle'} if ($episode->{'subtitle'});
+                print ':  ', $episode->{'subtitle'} if ($episode->{'subtitle'} && $episode->{'subtitle'} ne 'Untitled');
                 print "\nUse the following commands:\n";
             }
             else {
                 print "\nNow encoding:  ", $episode->{'title'};
-                print ':  ', $episode->{'subtitle'} if ($episode->{'subtitle'});
+                print ':  ', $episode->{'subtitle'} if ($episode->{'subtitle'} && $episode->{'subtitle'} ne 'Untitled');
                 print "\nEncode started:  ".localtime()."\n";
             }
             my $start = time();
