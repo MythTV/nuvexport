@@ -19,7 +19,7 @@ package mythtv::recordings;
         use Exporter;
         our @ISA = qw/ Exporter /;
 
-        our @EXPORT = qw/ &load_finfo &load_recordings %Shows /;
+        our @EXPORT = qw/ &load_finfo &load_recordings %Shows &aspect_str &aspect_float /;
 
     # These are available for export, but for the most part should only be needed here
         our @EXPORT_OK = qw/ $num_shows /;
@@ -119,4 +119,43 @@ package mythtv::recordings;
         }
     }
 
+    sub aspect_str {
+        my $aspect = shift;
+    # Already in ratio format
+        return $aspect if ($aspect =~ /^\d+:\d+$/);
+    # European decimals...
+        $aspect =~ s/\,/\./;
+    # Parse out decimal formats
+        if ($aspect == 1)           { return '1:1';    }
+        elsif ($aspect =~ m/^1.3/)  { return '4:3';    }
+        elsif ($aspect =~ m/^1.5$/) { return '3:2';    }
+        elsif ($aspect =~ m/^1.55/) { return '14:9';   }
+        elsif ($aspect =~ m/^1.7/)  { return '16:9';   }
+        elsif ($aspect == 2.21)     { return '2.21:1'; }
+    # Unknown aspect
+        print STDERR "Unknown aspect ratio:  $aspect\n";
+        return $aspect.':1';
+    }
+
+    sub aspect_float {
+        my $aspect = shift;
+    # European decimals...
+        $aspect =~ s/\,/\./;
+    # In ratio format -- do the math
+        if ($aspect =~ /^\d+:\d+$/) {
+            my ($w, $h) = split /:/, $aspect;
+            return $w / $h;
+        }
+    # Parse out decimal formats
+        if ($aspect eq '1')         { return  1;     }
+        elsif ($aspect =~ m/^1.3/)  { return  4 / 3; }
+        elsif ($aspect =~ m/^1.5$/) { return  3 / 2; }
+        elsif ($aspect =~ m/^1.55/) { return 14 / 9; }
+        elsif ($aspect =~ m/^1.7/)  { return 16 / 9; }
+    # Unknown aspect
+        return $aspect;
+       
+    }
+
+1;
 # vim:ts=4:sw=4:ai:et:si:sts=4
