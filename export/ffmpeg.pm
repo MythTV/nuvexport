@@ -47,9 +47,6 @@ package export::ffmpeg;
     # Make sure we have yuvdenoise
         my $yuvdenoise = find_program('yuvdenoise')
             or push @{$self->{'errors'}}, 'You need yuvdenoise (part of mjpegtools) to use this exporter.';
-    # Make sure we have sox
-        my $sox = find_program('sox')
-            or push @{$self->{'errors'}}, 'You need sox to use this exporter.';
     # Check the yuvdenoise version
         if (!defined $self->{'denoise_vmaj'}) {
             $data = `cat /dev/null | yuvdenoise 2>&1`;
@@ -187,6 +184,7 @@ package export::ffmpeg;
     # Here, we have to fork off a copy of mythtranscode (Do not use --fifosync with ffmpeg or it will hang)
         my $mythtranscode_bin = find_program('mythtranscode');
         $mythtranscode = "$NICE $mythtranscode_bin --showprogress"
+                        ." --logpath /tmp --loglevel debug"
                         ." --profile '$episode->{'transcoder'}'"
                         ." --chanid '$episode->{'chanid'}'"
                         ." --starttime '".unix_to_myth_time($episode->{'recstartts'})."'"
@@ -206,7 +204,6 @@ package export::ffmpeg;
         my $height;
         my $width;
         my @filters;
-        my $sox;
 
     # Standard encodes
         if (!$self->{'audioonly'}) {
@@ -234,21 +231,6 @@ package export::ffmpeg;
             }
         }
 
-    # If we have 6-channel audio, and want 2-channel, we need to use sox as
-    # ffmpeg is retarded and won't/can't do it
-        if ((!$firstpass || $self->{'audioonly'}) &&
-            $episode->{'finfo'}{'audio_channels'} > 2) {
-            my $newaudiofifo = "/tmp/fifodir_$$/audout2";
-            $sox = "$NICE sox --single-threaded -t raw -e signed -2" 
-                 . " -c " . $episode->{'finfo'}{'audio_channels'} 
-                 . " -r " . $episode->{'finfo'}{'audio_sample_rate'}
-                 . " $audiofifo -t raw -e signed -2 -c 2"
-                 . " -r " . $episode->{'finfo'}{'audio_sample_rate'}
-                 . " $newaudiofifo"
-                 . " remix -m 1,4v0.5,2v0.7 3,5v0.5,2v0.7";
-            $audiofifo = $newaudiofifo;
-        }
-
     # Start the ffmpeg command
         $ffmpeg .= "$NICE mythffmpeg";
         if ($num_cpus > 1) {
@@ -258,6 +240,7 @@ package export::ffmpeg;
         if (!$firstpass) {
         $ffmpeg  .=' -f '.($Config{'byteorder'} == 4321 ? 's16be' : 's16le')
                   .' -ar ' . $episode->{'finfo'}{'audio_sample_rate'}
+# mythtranscode is always downmixing to stereo now
 #                  .' -ac ' . $episode->{'finfo'}{'audio_channels'};
                   .' -ac 2';
             $ffmpeg .= " -i $audiofifo";
@@ -351,8 +334,7 @@ package export::ffmpeg;
             $ffmpeg .= ' '.shell_escape($self->get_outfile($episode, $suffix));
         }
     # ffmpeg pids
-        my ($mythtrans_pid, $sox_pid, $ffmpeg_pid, $mythtrans_h, $sox_h, 
-            $ffmpeg_h);
+        my ($mythtrans_pid, $ffmpeg_pid, $mythtrans_h, $ffmpeg_h);
 
     # Create a directory for mythtranscode's fifo's
         mkdir("/tmp/fifodir_$$/", 0755) or die "Can't create /tmp/fifodir_$$/:  $!\n\n";
@@ -360,15 +342,6 @@ package export::ffmpeg;
         $children{$mythtrans_pid} = 'mythtranscode' if ($mythtrans_pid);
         fifos_wait("/tmp/fifodir_$$/", $mythtrans_pid, $mythtrans_h);
         push @tmpfiles, "/tmp/fifodir_$$", "/tmp/fifodir_$$/audout", "/tmp/fifodir_$$/vidout";
-
-    # Run sox if needed
-        if ((!$firstpass || $self->{'audioonly'}) &&
-            ($episode->{'finfo'}{'audio_channels'} > 2)) {
-            POSIX::mkfifo( "/tmp/fifodir_$$/audout2", 0644 );
-            push @tmpfiles, "/tmp/fifodir_$$/audout2";
-            ($sox_pid, $sox_h) = fork_command("$sox 2>&1");
-            $children{$sox_pid} = 'sox' if ($sox_pid);
-        }
 
     # For multipass encodes, we don't need the audio on the first pass
         if ($self->{'audioonly'}) {
