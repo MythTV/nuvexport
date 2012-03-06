@@ -184,7 +184,7 @@ package export::ffmpeg;
     # Here, we have to fork off a copy of mythtranscode (Do not use --fifosync with ffmpeg or it will hang)
         my $mythtranscode_bin = find_program('mythtranscode');
         $mythtranscode = "$NICE $mythtranscode_bin --showprogress"
-                        ." --logpath /tmp --loglevel debug"
+#                        ." --logpath /tmp --loglevel debug"
                         ." --profile '$episode->{'transcoder'}'"
                         ." --chanid '$episode->{'chanid'}'"
                         ." --starttime '".unix_to_myth_time($episode->{'recstartts'})."'"
