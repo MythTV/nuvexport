@@ -255,7 +255,7 @@ package export::ffmpeg::H264;
     # Don't forget the audio, etc.
         $self->{'ffmpeg_xtra'} = $ffmpeg_xtra
                                 ." -acodec $acodec -ar 48000 -async 1"
-                                ." -strict experimental" if ($acodec eq "aac")
+                                .($acodec eq "aac" ? " -strict experimental" : "")
                                 .$self->param('ab', $self->{'a_bitrate'});
     # Execute the (final pass) encode
         $self->SUPER::export($episode, '.mp4');
