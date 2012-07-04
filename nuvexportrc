@@ -216,7 +216,7 @@
     use_cutlist = yes
 
 #
-# Tell mythcommflag to generate a cutlist from the commercial flags before
+# Tell mythutil to generate a cutlist from the commercial flags before
 #    exporting.  Don't forget to enable use_cutlist above, too.
 #
 #   gencutlist = no

@@ -207,12 +207,12 @@ package export::generic;
         my $episode = shift;
     # Don't generate a cutlist
         return unless ($self->val('gencutlist'));
-    # Find mythcommflag
-        my $mythcommflag = find_program('mythcommflag');
+    # Find mythutil
+        my $mythutil = find_program('mythutil');
     # Nothing?
-        die "Can't find mythcommflag.\n" unless ($mythcommflag);
+        die "Can't find mythutil.\n" unless ($mythutil);
     # Generate the cutlist
-        system("$NICE $mythcommflag --gencutlist -c '$episode->{'chanid'}' -s '".unix_to_myth_time($episode->{'recstartts'})."'");
+        system("$NICE $mythutil --gencutlist --chanid '$episode->{'chanid'}' --starttime '".unix_to_myth_time($episode->{'recstartts'})."'");
     }
 
 # Check for a duplicate filename, and return a full path to the output filename
