@@ -117,10 +117,10 @@ package export::ffmpeg;
         my $param = lc(shift);
         my $value = shift;
     # No more version checks (until ffmpeg starts doing crazy releases again)
-        return param_pair('ab',             $value.'k') if ($param eq 'ab');
+        return param_pair('b:a',            $value.'k') if ($param eq 'ab');
         return param_pair('ac',             $value)     if ($param eq 'channels');
         return param_pair('ar',             $value)     if ($param eq 'sample_rate');
-        return param_pair('b',              $value.'k') if ($param eq 'bit_rate');
+        return param_pair('b:v',            $value.'k') if ($param eq 'bit_rate');
         return param_pair('b_qfactor',      $value)     if ($param eq 'b_quant_factor');
         return param_pair('b_qoffset',      $value)     if ($param eq 'b_quant_offset');
         return param_pair('bf',             $value)     if ($param eq 'max_b_frames');
@@ -290,7 +290,7 @@ package export::ffmpeg;
 
         # Deinterlace in ffmpeg only if the user wants to
             if ($self->val('deinterlace') && !($self->val('noise_reduction') && $self->val('deint_in_yuvdenoise'))) {
-                $ffmpeg .= ' -deinterlace';
+                $ffmpeg .= ' -filter:v yadif';
             }
         # Slicify should be early on in the filters to allow for better cache
         # use in ffmpeg

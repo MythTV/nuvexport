@@ -22,7 +22,10 @@ package export::ffmpeg::H264;
     add_arg('v_bitrate|v=i',    'Video bitrate');
     add_arg('multipass!',       'Enable two-pass encoding.');
     add_arg('mp4_fps=s',        'Framerate to use:  auto, 25, 23.97, 29.97.');
-    add_arg('ipod!',            'Produce ipod-compatible output.');
+    add_arg('x264_profile=s',   'x264 profile to use:  baseline, main, high, high10, high422, high444.');
+    add_arg('x264_preset=s',    'x264 preset to use:  ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, veryslow, placebo.');
+    add_arg('x264_tune=s',      'x264 tuning to use:  film, animation, grain, stillimage, psnr, ssim, fastdecode, zerolatency.');
+    add_arg('ipod!',            'Produce (older) ipod-compatible output.');
 
     sub new {
         my $class = shift;
@@ -43,6 +46,11 @@ package export::ffmpeg::H264;
         die "Video bitrate must be > 0\n" unless (!defined $self->val('v_bitrate') || $self->{'v_bitrate'} > 0);
         die "Width must be > 0\n"         unless (!defined $self->val('width')     || $self->{'width'} =~ /^\s*\D/  || $self->{'width'}  > 0);
         die "Height must be > 0\n"        unless (!defined $self->val('height')    || $self->{'height'} =~ /^\s*\D/ || $self->{'height'} > 0);
+
+    # Manual check for "default"
+        if ($self->val('x264_tune') =~ /^(?:0|n(?:o)?|f(?:alse)?|o(?:ff)?|default)$/) {
+            $self->{'x264_tune'} = "";
+        }
 
     # VBR, multipass, etc.
         if ($self->val('multipass')) {
@@ -78,9 +86,12 @@ package export::ffmpeg::H264;
     # Load the parent module's settings
         $self->SUPER::load_defaults();
     # Default settings
-        $self->{'defaults'}{'v_bitrate'}  = 384;
-        $self->{'defaults'}{'a_bitrate'}  = 64;
-        $self->{'defaults'}{'width'}      = 320;
+        $self->{'defaults'}{'v_bitrate'}    = 384;
+        $self->{'defaults'}{'a_bitrate'}    = 64;
+        $self->{'defaults'}{'width'}        = 320;
+        $self->{'defaults'}{'x264_profile'} = 'high';
+        $self->{'defaults'}{'x264_preset'}  = 'slower';
+        $self->{'defaults'}{'x264_tune'}    = '';
     }
 
 # Gather settings from the user
@@ -187,7 +198,7 @@ package export::ffmpeg::H264;
             ;
     # Options required for the codecs separately
         $ffmpeg_xtra .= ' -level 30'
-                       .' -flags loop+slice'
+                       .' -flags loop'
                        .' -g 250 -keyint_min 25'
                        .' -sc_threshold 40'
                        .' -rc_eq \'blurCplx^(1-qComp)\''
@@ -243,13 +254,16 @@ package export::ffmpeg::H264;
         $ffmpeg_xtra .= ' -refs '.($self->val('ipod') ? 2 : 7)
                        .' -subq 7'
                        .' -partitions parti4x4+parti8x8+partp4x4+partp8x8+partb8x8'
-                       .' -flags2 +bpyramid+wpred+mixed_refs+dct8x8'
                        .' -me_range 21'
                        .' -trellis 2'
                        .' -cmp 1'
                        # These should match the defaults:
-                       .' -deblockalpha 0 -deblockbeta 0'
+                       .' -preset ' . $self->val('x264_preset')
+                       .' -profile ' . $self->val('x264_profile')
                        ;
+        if ($self->val('x264_tune')) {
+            $ffmpeg_xtra .= ' -tune ' . $self->val('x264_tune');
+        }
     # Audio codec name changes between ffmpeg versions
         my $acodec = $self->can_encode('libfaac') ? 'libfaac' : 'aac';
     # Don't forget the audio, etc.
