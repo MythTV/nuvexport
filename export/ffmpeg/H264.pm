@@ -198,7 +198,9 @@ package export::ffmpeg::H264;
             ;
     # Options required for the codecs separately
         $ffmpeg_xtra .= ' -level 30'
-                       .' -flags loop'
+                       .' -flags +loop'
+# Not sure why thes don't work
+#.'  -deblockalpha 0 -deblockbeta 0'
                        .' -g 250 -keyint_min 25'
                        .' -sc_threshold 40'
                        .' -rc_eq \'blurCplx^(1-qComp)\''
@@ -252,6 +254,7 @@ package export::ffmpeg::H264;
         }
     # Single/final pass options
         $ffmpeg_xtra .= ' -refs '.($self->val('ipod') ? 2 : 7)
+# refs up to 16 for animated
                        .' -subq 7'
                        .' -partitions parti4x4+parti8x8+partp4x4+partp8x8+partb8x8'
                        .' -me_range 21'
