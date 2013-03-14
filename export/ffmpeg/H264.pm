@@ -253,8 +253,7 @@ package export::ffmpeg::H264;
             }
         }
     # Single/final pass options
-        $ffmpeg_xtra .= ' -refs '.($self->val('ipod') ? 2 : 7)
-# refs up to 16 for animated
+        $ffmpeg_xtra .= ' -refs '.($self->val('ipod') ? 2 : ($self->val('x264_tune') eq 'animation' ? 16 : 8))
                        .' -subq 7'
                        .' -partitions parti4x4+parti8x8+partp4x4+partp8x8+partb8x8'
                        .' -me_range 21'
