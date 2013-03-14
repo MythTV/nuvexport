@@ -199,8 +199,9 @@ package export::ffmpeg::H264;
     # Options required for the codecs separately
         $ffmpeg_xtra .= ' -level 30'
                        .' -flags +loop'
-# Not sure why thes don't work
-#.'  -deblockalpha 0 -deblockbeta 0'
+                       # Not sure why thes don't work
+                       #.' -deblockalpha 0 -deblockbeta 0'
+                       .' -b-pyramid normal'
                        .' -g 250 -keyint_min 25'
                        .' -sc_threshold 40'
                        .' -rc_eq \'blurCplx^(1-qComp)\''
