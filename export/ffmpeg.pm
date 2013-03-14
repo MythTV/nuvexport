@@ -208,6 +208,7 @@ package export::ffmpeg;
     # Standard encodes
         if (!$self->{'audioonly'}) {
         # Do noise reduction -- ffmpeg's -nr flag doesn't seem to do anything other than prevent denoise from working
+        # @todo look into hqdn3d filter
             if ($self->{'noise_reduction'}) {
                 $ffmpeg .= "$NICE mythffmpeg -f rawvideo";
                 $ffmpeg .= ' -s ' . $episode->{'finfo'}{'width'} . 'x' . $episode->{'finfo'}{'height'};
@@ -290,7 +291,7 @@ package export::ffmpeg;
 
         # Deinterlace in ffmpeg only if the user wants to
             if ($self->val('deinterlace') && !($self->val('noise_reduction') && $self->val('deint_in_yuvdenoise'))) {
-                push @filters, 'yadif=1';
+                push @filters, 'yadif';
             }
 
         # Slicify should be early on in the filters to allow for better cache
