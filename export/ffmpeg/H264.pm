@@ -198,10 +198,10 @@ package export::ffmpeg::H264;
             ;
     # Options required for the codecs separately
         $ffmpeg_xtra .= ' -level 30'
-                       .' -flags +loop'
-                       # Not sure why thes don't work
-                       #.' -deblockalpha 0 -deblockbeta 0'
-                       .' -b-pyramid normal'
+                       .' -coder 1'
+                       .' -flags +loop+mv4'
+                       .' -b-pyramid normal -b_strategy 1'
+                       .' -wpredp 1 -mixed-refs 1 -8x8dct 1'
                        .' -g 250 -keyint_min 25'
                        .' -sc_threshold 40'
                        .' -rc_eq \'blurCplx^(1-qComp)\''
@@ -211,11 +211,11 @@ package export::ffmpeg::H264;
                        .$self->param('i_quant_factor',     0.71428572)
                        .$self->param('b_quant_factor',     0.76923078)
                        .$self->param('max_b_frames',       0)
-                       .' -me_method umh'
                        ;
     # Some shared options
         if ($self->{'multipass'} || $self->{'vbr'}) {
             $ffmpeg_xtra .= $self->param('qcompress', 0.6)
+                           .$self->param('qmin',      10)
                            .$self->param('qmax',      51)
                            .$self->param('max_qdiff', 4)
                            ;
@@ -240,6 +240,7 @@ package export::ffmpeg::H264;
                                     .' -f mp4'
                                     .' -refs 1 -subq 1'
                                     .' -trellis 0'
+                                    .' -me_method hex'
                                     ;
             $self->SUPER::export($episode, '', 1);
         # Second Pass
@@ -256,13 +257,13 @@ package export::ffmpeg::H264;
     # Single/final pass options
         $ffmpeg_xtra .= ' -refs '.($self->val('ipod') ? 2 : ($self->val('x264_tune') eq 'animation' ? 12 : 6))
                        .' -subq 7'
-                       .' -partitions parti4x4+parti8x8+partp4x4+partp8x8+partb8x8'
+                       .' -partitions +parti4x4+parti8x8+partp4x4+partp8x8+partb8x8'
+                       .' -me_method umh'
                        .' -me_range 21'
                        .' -trellis 2'
-                       .' -cmp 1'
-                       # These should match the defaults:
+                       .' -cmp 256'
                        .' -preset ' . $self->val('x264_preset')
-                       .' -profile ' . $self->val('x264_profile')
+                       .' -profile:v ' . $self->val('x264_profile')
                        ;
         if ($self->val('x264_tune')) {
             $ffmpeg_xtra .= ' -tune ' . $self->val('x264_tune');
