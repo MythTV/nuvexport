@@ -290,11 +290,13 @@ package export::ffmpeg;
 
         # Deinterlace in ffmpeg only if the user wants to
             if ($self->val('deinterlace') && !($self->val('noise_reduction') && $self->val('deint_in_yuvdenoise'))) {
-                $ffmpeg .= ' -filter:v yadif';
+                push @filters, 'yadif=1';
             }
+
         # Slicify should be early on in the filters to allow for better cache
         # use in ffmpeg
             push @filters, "slicify";
+
         # Crop
             if ($self->{'crop'}) {
                 my $t = sprintf('%.0f', ($self->val('crop_top')    / 100) * $episode->{'finfo'}{'height'});
@@ -314,11 +316,11 @@ package export::ffmpeg;
 
         # Letter/Pillarboxing as appropriate
             push @filters, "scale=$scale_w:$scale_h";
-            push @filters, "pad=$width:$height:$pad_w:$pad_h:black" if ($pad_h | $pad_w);
+            push @filters, "pad=$width:$height:$pad_w:$pad_h:black" if ($pad_h || $pad_w);
             push @filters, "setsar=1";
 
         # Add in the filters
-            $ffmpeg .= " -vf " . join(",", @filters) if ($#filters != -1);
+            $ffmpeg .= " -filter:v " . join(",", @filters) if ($#filters != -1);
         }
 
     # Add any additional settings from the child module
